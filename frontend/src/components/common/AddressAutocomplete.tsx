@@ -70,7 +70,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect }: Addre
         onChange={(e) => onChange(e.target.value)}
         placeholder="Start typing an address..."
         required
-        className="w-full rounded-lg border border-line px-4 py-2.5 font-body text-ink placeholder:text-ink/40 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-amber/60 focus:border-navy"
+        className="w-full rounded-lg border border-line px-4 py-2.5 font-body text-ink placeholder:text-ink/40 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green/30 focus:border-green"
       />
     </div>
   )

@@ -2,6 +2,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import Button from '../common/Button'
 
+function dashboardPath(role?: string) {
+  if (role === 'owner') return '/owner/dashboard'
+  if (role === 'user') return '/user/dashboard'
+  if (role === 'admin') return '/admin/dashboard'
+  return '/'
+}
+
 export default function Navbar() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
@@ -15,8 +22,10 @@ export default function Navbar() {
 
         {user ? (
           <>
-            <Link to="/owner/dashboard" className="text-sm font-medium text-ink/70 hover:text-navy transition-colors">Dashboard</Link>
-            <span className="text-sm font-medium text-ink/70">Hi, {user.name.split(' ')[0]}</span>
+            <Link to={dashboardPath(user.role)} className="text-sm font-medium text-ink/70 hover:text-navy transition-colors">
+              Dashboard
+            </Link>
+            <span className="text-sm font-medium text-ink/70">Hi, {user.full_name.split(' ')[0]}</span>
             <Button variant="secondary" onClick={() => { logout(); navigate('/login') }}>Log out</Button>
           </>
         ) : (

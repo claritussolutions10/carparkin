@@ -21,14 +21,7 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'De
         <p className="mt-2 text-sm text-ink/60">{message}</p>
         <div className="mt-6 flex gap-3 justify-end">
           <Button variant="secondary" onClick={onCancel} disabled={loading}>Cancel</Button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-body font-medium text-sm bg-danger text-white hover:bg-danger/90 transition-colors focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-            {confirmLabel}
-          </button>
+          <Button variant="danger" onClick={onConfirm} loading={loading}>{confirmLabel}</Button>
         </div>
       </div>
     </div>
