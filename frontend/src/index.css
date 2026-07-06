@@ -12,6 +12,12 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "IBM Plex Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+
+  --color-green: #22c55e;
+  --color-green-light: #16a34a;
+  --color-admin-bg: #F4F5F7;
+  --color-admin-surface: #FFFFFF;
+  --color-admin-border: #D7DBE0;
 }
 
 body {

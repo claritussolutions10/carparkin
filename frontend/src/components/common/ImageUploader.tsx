@@ -1,12 +1,47 @@
 import { useRef, useState } from 'react'
 
+export interface UploadedImage {
+  url: string
+  publicId: string
+}
+
 interface ImageUploaderProps {
-  images: string[]
-  onChange: (images: string[]) => void
+  images: UploadedImage[]
+  onChange: (images: UploadedImage[]) => void
 }
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+
+export function uploadFile(file: File, onProgress?: (pct: number) => void): Promise<UploadedImage> {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    return Promise.reject(new Error('Cloudinary not configured — add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env'))
+  }
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('upload_preset', UPLOAD_PRESET)
+
+  return new Promise<UploadedImage>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`)
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100))
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const data = JSON.parse(xhr.responseText)
+        resolve({ url: data.secure_url, publicId: data.public_id })
+      } else {
+        reject(new Error('Upload failed'))
+      }
+    }
+
+    xhr.onerror = () => reject(new Error('Upload failed'))
+    xhr.send(formData)
+  })
+}
 
 export default function ImageUploader({ images, onChange }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -25,7 +60,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
     setUploading(true)
     setProgress(0)
 
-    const newUrls: string[] = []
+    const newImages: UploadedImage[] = []
     const total = files.length
 
     for (let i = 0; i < total; i++) {
@@ -35,7 +70,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
       formData.append('upload_preset', UPLOAD_PRESET)
 
       try {
-        const res = await new Promise<string>((resolve, reject) => {
+        const res = await new Promise<UploadedImage>((resolve, reject) => {
           const xhr = new XMLHttpRequest()
           xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`)
 
@@ -49,7 +84,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
           xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
               const data = JSON.parse(xhr.responseText)
-              resolve(data.secure_url)
+              resolve({ url: data.secure_url, publicId: data.public_id })
             } else {
               reject(new Error('Upload failed'))
             }
@@ -59,14 +94,14 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
           xhr.send(formData)
         })
 
-        newUrls.push(res)
+        newImages.push(res)
       } catch {
         setError(`Failed to upload ${file.name}`)
       }
     }
 
-    if (newUrls.length > 0) {
-      onChange([...images, ...newUrls])
+    if (newImages.length > 0) {
+      onChange([...images, ...newImages])
     }
     setUploading(false)
     setProgress(0)
@@ -97,7 +132,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-8 cursor-pointer transition-colors ${
-          dragOver ? 'border-amber bg-amber/5' : 'border-line hover:border-navy/40'
+          dragOver ? 'border-green bg-green/5' : 'border-line hover:border-green/40'
         } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
       >
         <svg className="w-8 h-8 text-ink/25" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -109,7 +144,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
 
         {uploading && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-line rounded-b-lg overflow-hidden">
-            <div className="h-full bg-amber transition-all duration-300" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-green transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
         )}
 
@@ -120,9 +155,9 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
 
       {images.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {images.map((url, i) => (
-            <div key={i} className="relative group">
-              <img src={url} alt="" className="h-20 w-20 rounded-lg object-cover border border-line" />
+          {images.map((img, i) => (
+            <div key={img.publicId || i} className="relative group">
+              <img src={img.url} alt="" className="h-20 w-20 rounded-lg object-cover border border-line" />
               <button
                 type="button"
                 onClick={() => removeImage(i)}

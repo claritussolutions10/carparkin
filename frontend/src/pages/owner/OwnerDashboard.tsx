@@ -1,115 +1,270 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/layout/Navbar'
-import ParkingCard, { ParkingCardSkeleton } from '../../components/common/ParkingCard'
-import EmptyState from '../../components/common/EmptyState'
-import ConfirmDialog from '../../components/common/ConfirmDialog'
-import Button from '../../components/common/Button'
-import { getOwnerParkings, deleteParking, type Parking } from '../../api/parkings.api'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import {
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+} from 'recharts'
+import { Plus, IndianRupee, Car, MapPin, ArrowUp, ArrowDown } from 'lucide-react'
+import { useAuthStore } from '../../store/authStore'
+import { getOwnerDashboard, getMonthlyEarnings, type OwnerDashboard, type MonthlyEarning } from '../../api/owner.api'
+import { getOwnerParkings, type OwnerParking } from '../../api/parkings.api'
+import StatCard from '../../components/common/StatCard'
+import Badge from '../../components/common/Badge'
+import Select from '../../components/common/Select'
 
-export default function OwnerDashboard() {
+function fmt(n: number) { return `₹${Number(n).toLocaleString('en-IN')}` }
+function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) }
+function fmtMonth(d: string) { return new Date(d).toLocaleDateString('en-IN', { month: 'short' }) }
+
+const RANGE_OPTIONS = [
+  { value: '6', label: 'Last 6 Months' },
+  { value: '12', label: 'Last 12 Months' },
+]
+
+function occupancyTone(pct: number) {
+  if (pct >= 80) return { text: 'text-green-700', bar: 'bg-green' }
+  if (pct >= 50) return { text: 'text-amber-700', bar: 'bg-amber' }
+  return { text: 'text-danger', bar: 'bg-danger' }
+}
+
+function TrendRow({ pct, caption }: { pct: number | null; caption: string }) {
+  if (pct === null) {
+    return <p className="text-xs text-ink/40 mt-1">{caption}</p>
+  }
+  const up = pct >= 0
+  return (
+    <p className="text-xs mt-1 flex items-center gap-1">
+      <span className={`flex items-center gap-0.5 font-medium ${up ? 'text-green' : 'text-danger'}`}>
+        {up ? <ArrowUp size={11} /> : <ArrowDown size={11} />}
+        {Math.abs(Math.round(pct))}%
+      </span>
+      <span className="text-ink/40">{caption}</span>
+    </p>
+  )
+}
+
+export default function OwnerDashboardPage() {
+  const { user } = useAuthStore()
   const navigate = useNavigate()
-  const [parkings, setParkings] = useState<Parking[]>([])
+
+  const [data, setData] = useState<OwnerDashboard | null>(null)
+  const [monthly, setMonthly] = useState<MonthlyEarning[]>([])
+  const [locations, setLocations] = useState<OwnerParking[]>([])
+  const [range, setRange] = useState('6')
   const [loading, setLoading] = useState(true)
-  const [deleteTarget, setDeleteTarget] = useState<Parking | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    getOwnerParkings()
-      .then(setParkings)
+    setLoading(true)
+    Promise.all([getOwnerDashboard(), getMonthlyEarnings(Number(range)), getOwnerParkings()])
+      .then(([dash, months, parkings]) => { setData(dash); setMonthly(months); setLocations(parkings) })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [range])
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return
-    setDeleting(true)
-    try {
-      await deleteParking(deleteTarget.id)
-      setParkings((prev) => prev.filter((p) => p.id !== deleteTarget.id))
-      setDeleteTarget(null)
-    } catch {
-    } finally {
-      setDeleting(false)
-    }
-  }
+  const revenueTrendPct = useMemo(() => {
+    const sorted = [...monthly].sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime())
+    const [current, previous] = sorted
+    if (!current || !previous || Number(previous.net_amount) === 0) return null
+    return ((Number(current.net_amount) - Number(previous.net_amount)) / Number(previous.net_amount)) * 100
+  }, [monthly])
 
-  const totalSpots = parkings.reduce((s, p) => s + p.capacity, 0)
-  const totalVacant = parkings.reduce((s, p) => s + p.vacancy, 0)
-  const avgPrice = parkings.length > 0
-    ? Math.round(parkings.reduce((s, p) => s + p.monthly_price, 0) / parkings.length)
+  const chartData = useMemo(() => (
+    [...monthly]
+      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
+      .map((m) => ({ month: fmtMonth(m.month), revenue: Number(m.net_amount) }))
+  ), [monthly])
+
+  const locationRows = useMemo(() => locations.map((l) => {
+    const filled = l.total_spaces - l.available_spaces
+    const pct = l.total_spaces > 0 ? Math.round((filled / l.total_spaces) * 100) : 0
+    return { id: l.id, name: l.title, filled, total: l.total_spaces, pct }
+  }), [locations])
+
+  const firstName = user?.full_name?.split(' ')[0] ?? 'there'
+
+  const filledSpaces = data ? data.listings.totalSpaces - data.listings.availableSpaces : 0
+  const occupancyPct = data && data.listings.totalSpaces > 0
+    ? Math.round((filledSpaces / data.listings.totalSpaces) * 100)
     : 0
 
-  const stats = [
-    { label: 'Listings', value: parkings.length },
-    { label: 'Total Spots', value: totalSpots },
-    { label: 'Available', value: totalVacant },
-    { label: 'Avg Price', value: `₹${avgPrice.toLocaleString('en-IN')}` },
-  ]
-
   return (
-    <div className="min-h-screen bg-concrete">
-      <Navbar />
-
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-display text-2xl font-semibold text-ink">Your Parkings</h1>
-            <p className="text-sm text-ink/50 mt-1">Manage your parking listings</p>
-          </div>
-          <Button onClick={() => navigate('/owner/parkings/new')}>Add Parking</Button>
+    <div className="p-6 md:p-10 max-w-7xl mx-auto">
+      {/* Header row */}
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-8">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Welcome back, {firstName}</h1>
+          <p className="text-sm text-ink/50 mt-1">Here's what's happening with your parking locations today.</p>
         </div>
-
-        {!loading && parkings.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-white rounded-xl border border-line p-4">
-                <p className="text-sm text-ink/50">{s.label}</p>
-                <p className="font-display text-xl font-semibold text-navy mt-1">{s.value}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 3 }, (_, i) => <ParkingCardSkeleton key={i} />)}
-          </div>
-        ) : parkings.length === 0 ? (
-          <EmptyState
-            icon={
-              <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-            }
-            title="No parkings yet"
-            description="Add your first parking location and start earning from your empty spaces."
-            actionLabel="Add your first parking"
-            onAction={() => navigate('/owner/parkings/new')}
-          />
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {parkings.map((p) => (
-              <ParkingCard
-                key={p.id}
-                parking={p}
-                variant="owner"
-                onEdit={() => navigate(`/owner/parkings/${p.id}/edit`)}
-                onDelete={() => setDeleteTarget(p)}
-              />
-            ))}
-          </div>
-        )}
+        <Link to="/owner/locations">
+          <button className="inline-flex items-center gap-2 bg-green text-white font-medium text-sm px-4 py-2.5 rounded-lg hover:bg-green-light transition-colors shrink-0">
+            <Plus size={16} /> Add New Location
+          </button>
+        </Link>
       </div>
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        title="Delete parking"
-        message={`Delete "${deleteTarget?.title}"? This can't be undone.`}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteTarget(null)}
-        loading={deleting}
-      />
+      {loading ? (
+        <div className="grid md:grid-cols-3 gap-6 mb-6">
+          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-white rounded-xl border border-line animate-pulse" />)}
+        </div>
+      ) : data ? (
+        <>
+          {/* Stat cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
+            <StatCard
+              label="Total Revenue (Monthly)"
+              value={fmt(data.earnings.thisMonth)}
+              icon={<IndianRupee size={16} />}
+              iconClassName="bg-green-100 text-green-700"
+              sub={<TrendRow pct={revenueTrendPct} caption="vs last month" />}
+            />
+            <StatCard
+              label="Active Bookings"
+              value={<>{filledSpaces} <span className="text-base font-normal text-ink/40">/ {data.listings.totalSpaces}</span></>}
+              icon={<Car size={16} />}
+              iconClassName="bg-blue-100 text-blue-500"
+              sub={<p className="text-xs text-ink/40 mt-1">{occupancyPct}% occupancy rate</p>}
+            />
+            <StatCard
+              label="Total Locations"
+              value={data.listings.total}
+              icon={<MapPin size={16} />}
+              iconClassName="bg-orange-100 text-orange-500"
+              sub={<p className="text-xs text-ink/40 mt-1">— 0% new locations</p>}
+            />
+          </div>
+
+          {/* Revenue Overview + Location Status */}
+          <div className="grid lg:grid-cols-[65fr_35fr] gap-6 mb-6">
+            <div className="bg-white rounded-xl border border-line p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display font-semibold text-ink">Revenue Overview</h2>
+                <Select
+                  options={RANGE_OPTIONS}
+                  value={range}
+                  onChange={(e) => setRange(e.target.value)}
+                />
+              </div>
+              {chartData.length === 0 ? (
+                <div className="h-64 flex items-center justify-center text-sm text-ink/40">No revenue data yet.</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#22c55e" stopOpacity={0.25} />
+                        <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#D7DBE0" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#6B7280' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Area type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={2} fill="url(#revenueFill)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div className="bg-white rounded-xl border border-line p-5">
+              <h2 className="font-display font-semibold text-ink mb-4">Location Status</h2>
+              {locationRows.length === 0 ? (
+                <div className="py-10 text-center text-sm text-ink/40">No locations yet.</div>
+              ) : (
+                <div className="space-y-5">
+                  {locationRows.map((l) => {
+                    const tone = occupancyTone(l.pct)
+                    return (
+                      <Link key={l.id} to={`/owner/locations/${l.id}/members`} className="block group">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-semibold text-ink truncate group-hover:text-green transition-colors">{l.name}</p>
+                          <span className={`text-sm font-semibold shrink-0 ${tone.text}`}>{l.pct}%</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-line overflow-hidden mt-2">
+                          <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${l.pct}%` }} />
+                        </div>
+                        <p className="text-xs text-ink/40 mt-1">{l.filled}/{l.total} spots taken</p>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+              <Link to="/owner/locations" className="block text-center text-sm font-medium text-green hover:text-green-light transition-colors mt-5">
+                View All Locations
+              </Link>
+            </div>
+          </div>
+
+          {/* Recent Bookings */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display font-semibold text-ink">Recent Bookings</h2>
+              <button onClick={() => navigate('/owner/bookings')} className="text-sm font-medium text-green hover:text-green-light transition-colors">
+                View All
+              </button>
+            </div>
+
+            <div className="bg-white rounded-xl border border-line overflow-hidden">
+              {data.recentBookings.length === 0 ? (
+                <div className="py-14 text-center text-sm text-ink/40">No bookings yet.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-line text-left">
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/40">Driver</th>
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/40">Car Details</th>
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/40">Location</th>
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/40">Date</th>
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/40 text-right">Amount</th>
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/40 text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
+                      {data.recentBookings.slice(0, 5).map((b) => (
+                        <tr key={b.id}>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-navy text-white text-xs font-medium flex items-center justify-center shrink-0">
+                                {b.user_name?.[0] ?? '?'}
+                              </div>
+                              <span className="font-medium text-ink whitespace-nowrap">{b.user_name}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4 whitespace-nowrap">
+                            {b.make ? (
+                              <>
+                                <p className="font-medium text-ink">{b.make} {b.model}</p>
+                                <p className="text-xs font-mono text-ink/40 mt-0.5">{b.registration_number}</p>
+                              </>
+                            ) : <span className="text-ink/30">—</span>}
+                          </td>
+                          <td className="px-5 py-4 text-ink/70 whitespace-nowrap">{b.listing_title}</td>
+                          <td className="px-5 py-4 text-ink/70 whitespace-nowrap">{fmtDate(b.booking_start_date)}</td>
+                          <td className="px-5 py-4 text-right font-semibold text-ink whitespace-nowrap">{fmt(b.total_price)}</td>
+                          <td className="px-5 py-4 text-right"><Badge status={b.status} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {data.listings.total === 0 && (
+            <div className="mt-6 bg-amber/10 border border-amber/20 rounded-xl px-5 py-4 flex items-center justify-between flex-wrap gap-3">
+              <p className="text-sm text-ink">You haven't added any parking locations yet.</p>
+              <Link to="/owner/locations" className="text-sm font-medium text-navy hover:underline">
+                Add your first location →
+              </Link>
+            </div>
+          )}
+        </>
+      ) : null}
     </div>
   )
 }

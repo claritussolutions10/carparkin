@@ -4,65 +4,55 @@ import VacancyGauge from './VacancyGauge'
 
 interface ParkingCardProps {
   parking: Parking
-  variant: 'owner' | 'driver'
+  variant: 'owner' | 'user'
   onEdit?: () => void
   onDelete?: () => void
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  active: 'bg-emerald-50 text-emerald-700',
-  inactive: 'bg-gray-100 text-gray-500',
-  pending_approval: 'bg-amber/10 text-amber',
-}
 
 export default function ParkingCard({ parking, variant, onEdit, onDelete }: ParkingCardProps) {
+  const badges: string[] = []
+  if (parking.has_cctv) badges.push('CCTV')
+  if (parking.has_security_guard) badges.push('Security')
+  if (parking.parking_type) badges.push(parking.parking_type)
+
   return (
     <div className="group bg-white rounded-xl border border-line overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="h-40 relative overflow-hidden">
-        {parking.images.length > 0 ? (
-          <img src={parking.images[0]} alt={parking.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-navy to-navy-light flex items-center justify-center">
-            <svg className="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H18.75m-7.5-2.25h5.25m-5.25 0v2.25m0-2.25L12 5.291A2.25 2.25 0 0 1 13.893 4.5h2.357c.82 0 1.573.452 1.961 1.175L20.25 9.75" />
-            </svg>
-          </div>
-        )}
-        {variant === 'owner' && (
-          <span className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[parking.status] || STATUS_STYLES.inactive}`}>
-            {parking.status.replace('_', ' ')}
-          </span>
-        )}
+        <div className="w-full h-full bg-gradient-to-br from-green to-green-light flex items-center justify-center">
+          <svg className="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H18.75m-7.5-2.25h5.25m-5.25 0v2.25m0-2.25L12 5.291A2.25 2.25 0 0 1 13.893 4.5h2.357c.82 0 1.573.452 1.961 1.175L20.25 9.75" />
+          </svg>
+        </div>
       </div>
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="font-display font-semibold text-ink truncate">{parking.title}</h3>
-            <p className="text-sm text-ink/50 truncate mt-0.5">{parking.address}, {parking.city}</p>
+            <p className="text-sm text-ink/50 truncate mt-0.5">{parking.address}</p>
           </div>
-          <VacancyGauge capacity={parking.capacity} vacancy={parking.vacancy} size="sm" />
+          <VacancyGauge capacity={parking.total_spaces} vacancy={parking.available_spaces} size="sm" />
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {parking.amenities.slice(0, 3).map((a) => (
-            <span key={a} className="text-xs bg-concrete px-2 py-0.5 rounded-md text-ink/60">{a}</span>
-          ))}
-          {parking.amenities.length > 3 && (
-            <span className="text-xs text-ink/40">+{parking.amenities.length - 3}</span>
-          )}
-        </div>
+        {badges.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {badges.map((b) => (
+              <span key={b} className="text-xs bg-concrete px-2 py-0.5 rounded-md text-ink/60">{b}</span>
+            ))}
+          </div>
+        )}
 
         <div className="mt-4 flex items-center justify-between">
-          <p className="font-display text-lg font-semibold text-navy">
-            ₹{parking.monthly_price.toLocaleString('en-IN')}
+          <p className="font-display text-lg font-semibold text-green">
+            ₹{parking.price_per_month.toLocaleString('en-IN')}
             <span className="text-xs font-normal text-ink/40">/mo</span>
           </p>
 
-          {variant === 'driver' && (
+          {variant === 'user' && (
             <Link
               to={`/parking/${parking.id}`}
-              className="text-sm font-medium text-navy hover:text-amber transition-colors"
+              className="text-sm font-medium text-green hover:text-green-light transition-colors"
             >
               View Details →
             </Link>
@@ -72,7 +62,7 @@ export default function ParkingCard({ parking, variant, onEdit, onDelete }: Park
             <div className="flex gap-2">
               <button
                 onClick={onEdit}
-                className="p-1.5 rounded-lg text-ink/40 hover:text-navy hover:bg-concrete transition-colors"
+                className="p-1.5 rounded-lg text-ink/40 hover:text-green hover:bg-concrete transition-colors"
                 aria-label="Edit"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
