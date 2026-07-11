@@ -22,12 +22,12 @@ function InstagramIcon(props: SVGProps<SVGSVGElement>) {
 
 export default function PublicFooter() {
   return (
-    <footer className="bg-white border-t border-line">
+    <footer className="bg-surface border-t border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2">
             <MapPin className="text-green" size={22} fill="currentColor" strokeWidth={1.5} />
-            <span className="font-display font-semibold text-navy">Carparkin.in</span>
+            <span className="font-display font-semibold text-ink">Carparkin.in</span>
           </div>
           <p className="mt-3 text-sm text-ink/50 max-w-xs">
             Making city living easier, one parking spot at a time. Secure, affordable, and flexible monthly parking.
@@ -38,8 +38,9 @@ export default function PublicFooter() {
           <h4 className="font-display font-semibold text-sm text-ink mb-3">Platform</h4>
           <ul className="space-y-2">
             <li><Link to="/search" className="text-sm text-ink/50 hover:text-green transition-colors">Find Parking</Link></li>
+            <li><Link to="/parking-in" className="text-sm text-ink/50 hover:text-green transition-colors">Browse by City</Link></li>
             <li><Link to="/signup" className="text-sm text-ink/50 hover:text-green transition-colors">List Your Space</Link></li>
-            <li><span className="text-sm text-ink/50">Pricing</span></li>
+            <li><Link to="/pricing" className="text-sm text-ink/50 hover:text-green transition-colors">Pricing</Link></li>
           </ul>
         </div>
 

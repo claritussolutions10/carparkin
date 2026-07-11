@@ -303,18 +303,19 @@ export async function submitBankDetails(
 
 export async function updateOwnerSettings(
   ownerId: string,
-  data: { fullName?: string; phoneNumber?: string; requiresListingApproval?: boolean }
+  data: { fullName?: string; phoneNumber?: string; profilePicture?: string; requiresListingApproval?: boolean }
 ) {
-  const { fullName, phoneNumber, requiresListingApproval } = data;
+  const { fullName, phoneNumber, profilePicture, requiresListingApproval } = data;
 
-  if (fullName !== undefined || phoneNumber !== undefined) {
+  if (fullName !== undefined || phoneNumber !== undefined || profilePicture !== undefined) {
     await pool.query(
       `UPDATE users
        SET full_name = COALESCE($1, full_name),
            phone_number = COALESCE($2, phone_number),
+           profile_picture = COALESCE($3, profile_picture),
            updated_at = NOW()
-       WHERE id = $3`,
-      [fullName ?? null, phoneNumber ?? null, ownerId]
+       WHERE id = $4`,
+      [fullName ?? null, phoneNumber ?? null, profilePicture ?? null, ownerId]
     );
   }
 

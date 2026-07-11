@@ -126,10 +126,10 @@ export async function replyReview(req: Request, res: Response) {
 }
 
 export async function updateSettings(req: Request, res: Response) {
-  const { fullName, phoneNumber, requiresListingApproval } = req.body;
+  const { fullName, phoneNumber, profilePicture, profile_picture, requiresListingApproval } = req.body;
   try {
     const settings = await ownerService.updateOwnerSettings(req.user!.userId, {
-      fullName, phoneNumber, requiresListingApproval,
+      fullName, phoneNumber, profilePicture: profilePicture ?? profile_picture, requiresListingApproval,
     });
     res.json({ settings });
   } catch (err: any) {

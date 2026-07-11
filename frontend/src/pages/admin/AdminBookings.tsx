@@ -23,14 +23,14 @@ function BookingStatCard({ label, value, caption, trend, trendTone }: { label: s
     ? (trendTone === 'green' ? 'bg-green-100 text-green-700' : 'bg-amber/20 text-amber-700')
     : 'bg-danger/10 text-danger'
   return (
-    <div className="bg-white rounded-xl border border-line p-5">
+    <div className="bg-surface rounded-xl border border-line p-5">
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm text-ink/50">{label}</p>
         {trend !== null && (
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${pillClass}`}>{positive ? '+' : ''}{trend}%</span>
         )}
       </div>
-      <p className="font-display text-2xl font-semibold text-navy mt-1">{value}</p>
+      <p className="font-display text-2xl font-semibold text-ink mt-1">{value}</p>
       <p className="text-xs text-ink/40 mt-1">{caption}</p>
     </div>
   )
@@ -222,7 +222,7 @@ export default function AdminBookings() {
       )}
 
       {/* Search + filters */}
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search ID, User, or License Plate..." className="flex-1 min-w-[220px]" />
         <Select value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status: All" options={STATUS_OPTIONS} />
         <Select value={datePreset} onChange={(e) => setDatePreset(e.target.value)} options={DATE_OPTIONS} />
@@ -255,7 +255,7 @@ export default function AdminBookings() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

@@ -16,14 +16,20 @@ export default function ParkingCard({ parking, variant, onEdit, onDelete }: Park
   if (parking.has_security_guard) badges.push('Security')
   if (parking.parking_type) badges.push(parking.parking_type)
 
+  const photo = parking.thumbnail_url ?? parking.images?.[0]?.url
+
   return (
-    <div className="group bg-white rounded-xl border border-line overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+    <div className="group bg-surface rounded-xl border border-line overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="h-40 relative overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-green to-green-light flex items-center justify-center">
-          <svg className="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H18.75m-7.5-2.25h5.25m-5.25 0v2.25m0-2.25L12 5.291A2.25 2.25 0 0 1 13.893 4.5h2.357c.82 0 1.573.452 1.961 1.175L20.25 9.75" />
-          </svg>
-        </div>
+        {photo ? (
+          <img src={photo} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-green to-green-light flex items-center justify-center">
+            <svg className="w-10 h-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H18.75m-7.5-2.25h5.25m-5.25 0v2.25m0-2.25L12 5.291A2.25 2.25 0 0 1 13.893 4.5h2.357c.82 0 1.573.452 1.961 1.175L20.25 9.75" />
+            </svg>
+          </div>
+        )}
       </div>
 
       <div className="p-4">
@@ -88,7 +94,7 @@ export default function ParkingCard({ parking, variant, onEdit, onDelete }: Park
 
 export function ParkingCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-line overflow-hidden animate-pulse">
+    <div className="bg-surface rounded-xl border border-line overflow-hidden animate-pulse">
       <div className="h-40 bg-concrete" />
       <div className="p-4 space-y-3">
         <div className="flex justify-between">

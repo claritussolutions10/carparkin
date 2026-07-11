@@ -1,10 +1,11 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import {
-  ChevronRight, User, Percent, ShieldCheck, Phone, Tag, ParkingSquare, CreditCard,
+  ChevronRight, User, Percent, ShieldCheck, Phone, Tag, ParkingSquare, CreditCard, Image,
 } from 'lucide-react'
 
 const TABS = [
   { to: 'profile', icon: User, label: 'Profile' },
+  { to: 'branding', icon: Image, label: 'Branding & Site Media' },
   { to: 'commission', icon: Percent, label: 'Commission & Payouts' },
   { to: 'listing-policy', icon: ShieldCheck, label: 'Listing Policy' },
   { to: 'support', icon: Phone, label: 'Support & Contact' },
@@ -30,7 +31,7 @@ export default function ConfigurationLayout() {
       </div>
 
       <div className="grid md:grid-cols-[220px_1fr] gap-6 items-start">
-        <nav className="bg-white rounded-xl border border-line p-2 space-y-0.5 md:sticky md:top-6">
+        <nav className="bg-surface rounded-xl border border-line p-2 space-y-0.5 md:sticky md:top-6">
           {TABS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}

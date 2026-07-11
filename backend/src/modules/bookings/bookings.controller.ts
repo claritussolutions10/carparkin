@@ -43,20 +43,6 @@ export async function createBooking(req: Request, res: Response) {
   }
 }
 
-export async function confirmBooking(req: Request, res: Response) {
-  const { razorpayPaymentId } = req.body;
-  try {
-    const booking = await bookingsService.confirmBooking(
-      req.params.id as string,
-      req.user!.userId,
-      razorpayPaymentId
-    );
-    res.json({ booking, message: "Booking confirmed" });
-  } catch (err: any) {
-    res.status(err.status || 500).json({ error: err.message });
-  }
-}
-
 export async function completeBooking(req: Request, res: Response) {
   try {
     const booking = await bookingsService.completeBooking(req.params.id as string);

@@ -77,7 +77,7 @@ export default function AdminReviews() {
         <p className="text-sm text-ink/50 mt-1">Browse renter reviews and remove ones that violate content guidelines.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search by reviewer, listing, or review text..." className="flex-1 min-w-[220px]" />
         <Select value={maxRating} onChange={(e) => setMaxRating(e.target.value)} placeholder="All Ratings" options={RATING_OPTIONS} />
         <span className="ml-auto text-sm text-ink/40">{total} review{total === 1 ? '' : 's'}</span>
@@ -85,17 +85,17 @@ export default function AdminReviews() {
 
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-28 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-28 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : reviews.length === 0 ? (
-        <div className="bg-white rounded-xl border border-line py-16 text-center">
+        <div className="bg-surface rounded-xl border border-line py-16 text-center">
           <Star size={32} className="text-ink/20 mx-auto mb-3" />
           <p className="text-ink/40 text-sm">No reviews match this filter.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
-            <div key={r.id} className="bg-white rounded-xl border border-line p-5">
+            <div key={r.id} className="bg-surface rounded-xl border border-line p-5">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -108,7 +108,7 @@ export default function AdminReviews() {
                   </div>
                   <p className="text-sm font-medium text-ink">
                     {r.reviewer_name} <span className="text-ink/40 font-normal">on</span>{' '}
-                    <Link to={`/parking/${r.listing_id}`} className="text-navy hover:text-green transition-colors">{r.listing_title}</Link>
+                    <Link to={`/parking/${r.listing_id}`} className="text-ink hover:text-green transition-colors">{r.listing_title}</Link>
                   </p>
                   {r.review_text && <p className="text-sm text-ink/70 mt-1.5">{r.review_text}</p>}
                   <p className="text-xs text-ink/40 mt-1.5">{fmtDate(r.created_at)}</p>

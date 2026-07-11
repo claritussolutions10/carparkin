@@ -297,6 +297,29 @@ export async function updateUser(
   await logAdminAction(adminId, "user.update", "user", userId, data as Record<string, unknown>);
 }
 
+// --- Admin's own profile (Admin > Configuration > Profile) ---
+// Admin had no self-service profile update at all - name/email/photo could only be
+// changed directly in the database. This lets an admin update their own name, phone,
+// and avatar the same way owners/users can.
+export async function updateAdminProfile(
+  adminId: string,
+  data: { fullName?: string; phoneNumber?: string; profilePicture?: string }
+) {
+  const result = await pool.query(
+    `UPDATE users
+     SET full_name = COALESCE($1, full_name),
+         phone_number = COALESCE($2, phone_number),
+         profile_picture = COALESCE($3, profile_picture),
+         updated_at = NOW()
+     WHERE id = $4
+     RETURNING id, email, full_name, phone_number, profile_picture, role, updated_at`,
+    [data.fullName ?? null, data.phoneNumber ?? null, data.profilePicture ?? null, adminId]
+  );
+  if (!result.rows[0]) throw Object.assign(new Error("Admin not found"), { status: 404 });
+  await logAdminAction(adminId, "user.update", "user", adminId, data as Record<string, unknown>);
+  return result.rows[0];
+}
+
 export async function getListings(filters: {
   search?: string;
   status?: string;

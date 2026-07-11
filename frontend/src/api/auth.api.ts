@@ -7,6 +7,7 @@ export interface AuthUser {
   role: 'user' | 'owner' | 'admin'
   phone_number?: string
   is_email_verified?: boolean
+  profile_picture?: string | null
 }
 
 export interface AuthResponse {

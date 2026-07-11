@@ -9,6 +9,7 @@ export const generateVehicleId = (): string => `vhc_${ulid().toLowerCase()}`;
 export const generateReviewId = (): string => `rev_${ulid().toLowerCase()}`;
 export const generateEarningId = (): string => `ern_${ulid().toLowerCase()}`;
 export const generateImageId = (): string => `img_${ulid().toLowerCase()}`;
+export const generateFavoriteId = (): string => `fav_${ulid().toLowerCase()}`;
 
 export const generateId = (prefix: string): string => `${prefix}_${ulid().toLowerCase()}`;
 

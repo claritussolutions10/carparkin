@@ -1,5 +1,18 @@
 import client from './client'
 
+export interface AdminProfile {
+  id: string
+  email: string
+  full_name: string
+  phone_number: string | null
+  profile_picture: string | null
+  role: string
+  updated_at: string
+}
+
+export const updateAdminProfile = (data: { fullName?: string; phoneNumber?: string; profilePicture?: string }) =>
+  client.put<{ profile: AdminProfile }>('/admin/profile', data).then((r) => r.data.profile)
+
 export interface AdminStats {
   totalAccounts: number
   totalOwners: number
@@ -215,6 +228,8 @@ export interface PlatformConfig {
   supportPhone: string
   supportEmail: string
   supportHours: string
+  logoUrl: string | null
+  heroImageUrl: string | null
   updatedAt: string
 }
 
@@ -223,6 +238,7 @@ export const getAdminConfig = () =>
 
 export const updateAdminConfig = (data: Partial<{
   commissionRate: number; requireListingApproval: boolean; supportPhone: string; supportEmail: string; supportHours: string;
+  logoUrl: string; heroImageUrl: string;
 }>) =>
   client.put<{ config: PlatformConfig }>('/admin/config', data).then((r) => r.data.config)
 

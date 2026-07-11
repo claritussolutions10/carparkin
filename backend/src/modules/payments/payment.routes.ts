@@ -6,13 +6,10 @@ const router = Router();
 
 /**
  * @swagger
- * /api/payments/test/process:
+ * /api/payments/orders:
  *   post:
- *     summary: Process a mock payment [TEST ONLY]
- *     description: |
- *       Simulates payment processing. Always succeeds unless `forceFailure: true` is sent.
- *       In production this will be replaced by a Razorpay order creation + webhook confirmation flow.
- *     tags: [Payments (Test)]
+ *     summary: Create a Razorpay order for a pending booking
+ *     tags: [Payments]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -21,105 +18,63 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [bookingId, amount]
+ *             required: [bookingId]
  *             properties:
  *               bookingId:
  *                 type: string
  *                 example: bkg_01kw6pakzmx31vtf80sjnmjqv9
- *               amount:
- *                 type: number
- *                 description: Must match booking total_price
- *                 example: 2500
- *               forceFailure:
- *                 type: boolean
- *                 default: false
- *                 description: Set true to simulate a payment failure
  *     responses:
  *       200:
+ *         description: Order created — pass these straight into Razorpay Checkout.js
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success: { type: boolean }
- *                 paymentId: { type: string, example: "pay_test_1719000000000_abc123xyz" }
- *                 status: { type: string, enum: [completed, failed] }
- *                 message: { type: string }
- *                 bookingId: { type: string }
- *                 amount: { type: number }
- *                 testMode: { type: boolean, example: true }
+ *                 orderId: { type: string, example: order_ABC123 }
+ *                 amount: { type: integer, description: In paise, example: 250000 }
+ *                 currency: { type: string, example: INR }
+ *                 keyId: { type: string, example: rzp_test_xxxxxxxxxxxx }
  *       400:
- *         description: Missing fields or booking not in pending state
+ *         description: Booking is not in pending state
  *       403:
  *         description: Not your booking
  *       404:
  *         description: Booking not found
  */
-router.post("/test/process", authenticate, paymentController.processTestPayment);
+router.post("/orders", authenticate, paymentController.createOrder);
 
 /**
  * @swagger
- * /api/payments/test/verify:
+ * /api/payments/verify:
  *   post:
- *     summary: Verify a mock payment ID [TEST ONLY]
- *     description: Returns verified=true for any ID starting with pay_test_ or pay_
- *     tags: [Payments (Test)]
+ *     summary: Verify a completed Razorpay Checkout payment and confirm the booking
+ *     description: Recomputes the HMAC-SHA256 signature server-side — this is the only path that confirms a booking.
+ *     tags: [Payments]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [paymentId]
+ *             required: [bookingId, razorpay_order_id, razorpay_payment_id, razorpay_signature]
  *             properties:
- *               paymentId:
- *                 type: string
- *                 example: pay_test_1719000000000_abc123xyz
+ *               bookingId: { type: string }
+ *               razorpay_order_id: { type: string }
+ *               razorpay_payment_id: { type: string }
+ *               razorpay_signature: { type: string }
  *     responses:
  *       200:
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 verified: { type: boolean }
- *                 status: { type: string }
- *                 paymentId: { type: string }
- *                 testMode: { type: boolean }
+ *         description: Booking confirmed
  *       400:
- *         description: paymentId required
+ *         description: Signature mismatch — payment could not be verified
  */
-router.post("/test/verify", paymentController.verifyTestPayment);
+router.post("/verify", authenticate, paymentController.verify);
 
-/**
- * @swagger
- * /api/payments/test/{paymentId}:
- *   get:
- *     summary: Get mock payment details [TEST ONLY]
- *     tags: [Payments (Test)]
- *     parameters:
- *       - in: path
- *         name: paymentId
- *         required: true
- *         schema: { type: string }
- *         example: pay_test_1719000000000_abc123xyz
- *       - in: query
- *         name: amount
- *         schema: { type: number }
- *         description: Optional — echoed back in response
- *     responses:
- *       200:
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id: { type: string }
- *                 amount: { type: number }
- *                 currency: { type: string, example: INR }
- *                 status: { type: string }
- *                 testMode: { type: boolean }
- */
-router.get("/test/:paymentId", paymentController.getTestPaymentDetails);
+// /webhook is NOT mounted here - it needs a raw (non-JSON-parsed) body for
+// HMAC verification, so it's wired directly in app.ts ahead of the global
+// express.json() middleware. See app.ts for the route + swagger doc.
 
 export default router;

@@ -5,6 +5,8 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
+import { useLogoUrl } from '../../hooks/useLogoUrl'
+import ThemeToggle from '../common/ThemeToggle'
 
 const NAV = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -42,12 +44,17 @@ function NavGroup({ items, onNavigate }: { items: typeof NAV; onNavigate: () => 
   )
 }
 
-function Sidebar({ user, onNavigate, onLogout }: { user: { full_name?: string; email?: string } | null; onNavigate: () => void; onLogout: () => void }) {
+function Sidebar({ user, onNavigate, onLogout }: { user: { full_name?: string; email?: string; profile_picture?: string | null } | null; onNavigate: () => void; onLogout: () => void }) {
+  const logoUrl = useLogoUrl()
   return (
-    <aside className="w-64 bg-white border-r border-line flex flex-col h-full">
-      <div className="px-6 py-5 border-b border-line">
-        <span className="font-display text-lg font-semibold text-navy">Carparkin</span>
-        <p className="text-xs text-ink/40 mt-0.5">Admin Console</p>
+    <aside className="w-64 bg-surface border-r border-line flex flex-col h-full">
+      <div className="px-6 py-5 border-b border-line flex items-center gap-2.5">
+        {logoUrl && <img src={logoUrl} alt="Carparkin" className="h-7 w-auto object-contain shrink-0" />}
+        <div className="min-w-0 flex-1">
+          <span className="font-display text-lg font-semibold text-ink block leading-tight">Carparkin</span>
+          <p className="text-xs text-ink/40 mt-0.5">Admin Console</p>
+        </div>
+        <ThemeToggle />
       </div>
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         <NavGroup items={NAV} onNavigate={onNavigate} />
@@ -57,8 +64,12 @@ function Sidebar({ user, onNavigate, onLogout }: { user: { full_name?: string; e
       </nav>
       <div className="px-3 py-4 border-t border-line">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-8 h-8 rounded-full bg-green text-white text-xs flex items-center justify-center font-medium">
-            {user?.full_name?.[0] ?? 'A'}
+          <div className="w-8 h-8 rounded-full bg-green text-white text-xs flex items-center justify-center font-medium overflow-hidden shrink-0">
+            {user?.profile_picture ? (
+              <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
+            ) : (
+              user?.full_name?.[0] ?? 'A'
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-ink truncate">{user?.full_name}</p>
@@ -97,11 +108,11 @@ export default function AdminLayout() {
       )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-line px-6 py-4 flex items-center gap-4 lg:hidden">
+        <header className="bg-surface border-b border-line px-6 py-4 flex items-center gap-4 lg:hidden">
           <button onClick={() => setOpen(true)} className="p-1.5 rounded-lg hover:bg-concrete">
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <span className="font-display font-semibold text-navy">Carparkin Admin</span>
+          <span className="font-display font-semibold text-ink">Carparkin Admin</span>
         </header>
         <main className="flex-1 overflow-y-auto">
           <Outlet />

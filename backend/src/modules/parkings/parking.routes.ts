@@ -100,6 +100,30 @@ publicRouter.get("/amenities", parkingController.listAmenities);
 
 /**
  * @swagger
+ * /api/parkings/cities:
+ *   get:
+ *     summary: List cities that currently have active, approved listings, with counts
+ *     tags: [Parkings]
+ *     responses:
+ *       200:
+ *         description: Real, live city list - never hardcoded, since a city page with zero listings behind it is thin content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 cities:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       city: { type: string, example: "Bengaluru" }
+ *                       count: { type: integer, example: 12 }
+ */
+publicRouter.get("/cities", parkingController.listCities);
+
+/**
+ * @swagger
  * /api/parkings/{id}:
  *   get:
  *     summary: Get a single listing with amenities and owner info
@@ -171,6 +195,7 @@ ownerRouter.use(authenticate);
  *               title: { type: string, example: "My Parking Spot" }
  *               description: { type: string }
  *               address: { type: string, example: "456 Park Street" }
+ *               city: { type: string, example: "Bengaluru", description: "Google Places locality, captured by the address autocomplete" }
  *               latitude: { type: number, example: 28.705 }
  *               longitude: { type: number, example: 77.103 }
  *               total_spaces: { type: integer, example: 10 }

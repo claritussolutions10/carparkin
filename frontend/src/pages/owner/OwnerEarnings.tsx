@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { getOwnerEarnings, getMonthlyEarnings, getPayouts, type MonthlyEarning, type Payout } from '../../api/owner.api'
 import StatCard from '../../components/common/StatCard'
 import Badge from '../../components/common/Badge'
+import { useThemeStore } from '../../store/themeStore'
+import { chartTheme } from '../../lib/chartTheme'
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts'
@@ -12,6 +14,8 @@ function fmtMonth(d: string) {
 }
 
 export default function OwnerEarnings() {
+  const { theme } = useThemeStore()
+  const { grid } = chartTheme(theme === 'dark')
   const [summary, setSummary] = useState<any>(null)
   const [monthly, setMonthly] = useState<MonthlyEarning[]>([])
   const [payouts, setPayouts] = useState<Payout[]>([])
@@ -40,7 +44,7 @@ export default function OwnerEarnings() {
 
       {loading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-24 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-24 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : summary ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -53,11 +57,11 @@ export default function OwnerEarnings() {
 
       {/* Monthly chart */}
       {monthly.length > 0 && (
-        <div className="bg-white rounded-xl border border-line p-5 mb-6">
+        <div className="bg-surface rounded-xl border border-line p-5 mb-6">
           <h2 className="font-display font-semibold text-ink mb-4">Monthly Breakdown</h2>
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={chartData} margin={{ top: 4, right: 24, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#D7DBE0" />
+              <CartesianGrid strokeDasharray="3 3" stroke={grid} />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}k`} />
               <Tooltip formatter={(v: number) => fmt(v)} />
@@ -71,7 +75,7 @@ export default function OwnerEarnings() {
       )}
 
       {/* Payout history */}
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="px-5 py-4 border-b border-line">
           <h2 className="font-display font-semibold text-ink">Payout History</h2>
         </div>

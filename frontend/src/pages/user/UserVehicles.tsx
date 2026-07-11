@@ -61,10 +61,10 @@ export default function UserVehicles() {
 
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 2 }, (_, i) => <div key={i} className="h-24 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 2 }, (_, i) => <div key={i} className="h-24 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : vehicles.length === 0 ? (
-        <div className="bg-white rounded-xl border border-line p-12 text-center">
+        <div className="bg-surface rounded-xl border border-line p-12 text-center">
           <Car size={40} className="text-ink/20 mx-auto mb-3" />
           <p className="font-medium text-ink">No vehicles yet</p>
           <p className="text-sm text-ink/50 mt-1 mb-4">Add your vehicle to start booking parking spots.</p>
@@ -73,7 +73,7 @@ export default function UserVehicles() {
       ) : (
         <div className="space-y-3">
           {vehicles.map((v) => (
-            <div key={v.id} className={`bg-white rounded-xl border p-4 flex items-center gap-4 ${v.is_primary ? 'border-green' : 'border-line'}`}>
+            <div key={v.id} className={`bg-surface rounded-xl border p-4 flex items-center gap-4 ${v.is_primary ? 'border-green' : 'border-line'}`}>
               <div className="w-12 h-12 rounded-xl bg-green/10 flex items-center justify-center">
                 <Car size={20} className="text-green" />
               </div>

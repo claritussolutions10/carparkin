@@ -56,7 +56,7 @@ export default function PopoverPortal({ triggerRef, open, onClose, align = 'left
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
         style={{ position: 'fixed', top: position.top, left: position.left, maxHeight: 'calc(100vh - 16px)' }}
-        className="z-50 bg-white rounded-xl border border-line shadow-lg p-4 overflow-y-auto"
+        className="z-50 bg-surface rounded-xl border border-line shadow-lg p-4 overflow-y-auto"
       >
         {children}
       </div>

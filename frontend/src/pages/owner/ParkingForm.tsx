@@ -29,6 +29,7 @@ export default function ParkingForm() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [address, setAddress] = useState('')
+  const [city, setCity] = useState('')
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
   const [mapKey, setMapKey] = useState(0)
@@ -63,6 +64,7 @@ export default function ParkingForm() {
         setTitle(p.title)
         setDescription(p.description ?? '')
         setAddress(p.address)
+        setCity(p.city ?? '')
         setLatitude(p.latitude != null ? Number(p.latitude) : undefined)
         setLongitude(p.longitude != null ? Number(p.longitude) : undefined)
         setTotalSpaces(String(p.total_spaces))
@@ -126,6 +128,7 @@ export default function ParkingForm() {
         title: title.trim(),
         description: description.trim() || undefined,
         address: address.trim(),
+        city: city.trim() || undefined,
         latitude,
         longitude,
         total_spaces: Number(totalSpaces),
@@ -175,8 +178,8 @@ export default function ParkingForm() {
     return (
       <div className="p-6 md:p-10 max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-[65fr_35fr] gap-6">
-          <div className="h-96 bg-white rounded-xl border border-line animate-pulse" />
-          <div className="h-64 bg-white rounded-xl border border-line animate-pulse" />
+          <div className="h-96 bg-surface rounded-xl border border-line animate-pulse" />
+          <div className="h-64 bg-surface rounded-xl border border-line animate-pulse" />
         </div>
       </div>
     )
@@ -214,7 +217,7 @@ export default function ParkingForm() {
       <form onSubmit={handleSubmit} className="grid lg:grid-cols-[65fr_35fr] gap-6 items-start">
         {/* Main form column */}
         <div className="min-w-0 space-y-6">
-          <div className="bg-white rounded-xl border border-line p-6 divide-y divide-line">
+          <div className="bg-surface rounded-xl border border-line p-6 divide-y divide-line">
             {/* Basic details */}
             <div className="pb-6">
               <h2 className="font-display font-semibold text-ink mb-4">Basic Details</h2>
@@ -243,11 +246,14 @@ export default function ParkingForm() {
                   onChange={setAddress}
                   onSelect={(result) => {
                     setAddress(result.address)
+                    setCity(result.city)
                     setLatitude(result.latitude)
                     setLongitude(result.longitude)
                     setMapKey((k) => k + 1)
                   }}
                 />
+
+                <Input label="City" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Bangalore" />
 
                 <div className="relative">
                   <Input
@@ -279,7 +285,7 @@ export default function ParkingForm() {
                         }}
                       />
                     </Map>
-                    <span className="absolute top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-white rounded-full px-3.5 py-1.5 text-xs font-medium text-ink shadow-md pointer-events-none">
+                    <span className="absolute top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-surface rounded-full px-3.5 py-1.5 text-xs font-medium text-ink shadow-md pointer-events-none">
                       <MapPin size={12} /> Drag pin to adjust
                     </span>
                   </div>
@@ -352,7 +358,7 @@ export default function ParkingForm() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-1">Photos</h2>
             <p className="text-xs text-ink/40 mb-4">Changes here save immediately and don't require "Save Changes" below.</p>
             {existingImages.length > 0 && (
@@ -375,7 +381,7 @@ export default function ParkingForm() {
             {imageError && <p className="text-xs text-danger mt-2">{imageError}</p>}
           </div>
 
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-1">Blocked Dates</h2>
             <p className="text-xs text-ink/40 mb-4">Take this location offline for maintenance over a date range. Changes save immediately.</p>
 
@@ -432,7 +438,7 @@ export default function ParkingForm() {
 
         {/* Right sidebar */}
         <div className="space-y-6 min-w-0 lg:sticky lg:top-10">
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-4">Listing Status</h2>
 
             <div className="flex items-center justify-between gap-3 mb-4">

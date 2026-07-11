@@ -94,32 +94,32 @@ export default function AdminPayouts() {
 
       {stats && (
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Pending Payout</p>
               <div className="w-9 h-9 rounded-lg bg-amber/20 text-amber-700 flex items-center justify-center shrink-0"><Clock size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{fmt(stats.pendingAmount)}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{fmt(stats.pendingAmount)}</p>
             <p className="text-xs text-ink/40 mt-1">{stats.pendingCount} transaction{stats.pendingCount === 1 ? '' : 's'}</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Paid This Month</p>
               <div className="w-9 h-9 rounded-lg bg-green/10 text-green flex items-center justify-center shrink-0"><Wallet size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{fmt(stats.paidThisMonth)}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{fmt(stats.paidThisMonth)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Owners Awaiting</p>
               <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0"><Users size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.ownersAwaiting}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.ownersAwaiting}</p>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search by owner or listing..." className="flex-1 min-w-[220px]" />
         <Select value={status} onChange={(e) => setStatus(e.target.value)} placeholder="All Statuses" options={STATUS_OPTIONS} />
         <span className="ml-auto text-sm text-ink/40">{total} transaction{total === 1 ? '' : 's'}</span>
@@ -142,7 +142,7 @@ export default function AdminPayouts() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

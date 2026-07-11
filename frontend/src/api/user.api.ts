@@ -76,7 +76,7 @@ export const getUserDashboard = () =>
 export const getUserProfile = () =>
   client.get('/user/profile').then((r) => r.data.profile)
 
-export const updateUserProfile = (data: { fullName?: string; phoneNumber?: string }) =>
+export const updateUserProfile = (data: { fullName?: string; phoneNumber?: string; profilePicture?: string }) =>
   client.put('/user/profile', data).then((r) => r.data.profile)
 
 export const getUserBookings = (params?: { status?: string; page?: number; limit?: number }) =>
@@ -127,3 +127,31 @@ export const createSupportTicket = (data: { subject: string; message: string; is
 
 export const getMySupportTickets = () =>
   client.get<{ tickets: SupportTicket[] }>('/user/support/tickets').then((r) => r.data.tickets)
+
+export interface FavoriteParking {
+  favorite_id: string
+  favorited_at: string
+  id: string
+  title: string
+  address: string
+  price_per_month: number
+  price_per_week: number | null
+  price_per_day: number | null
+  total_spaces: number
+  available_spaces: number
+  has_cctv: boolean
+  has_security_guard: boolean
+  rating: number | null
+  review_count: number
+  parking_type: string | null
+  thumbnail_url: string | null
+}
+
+export const getFavorites = () =>
+  client.get<{ favorites: FavoriteParking[] }>('/user/favorites').then((r) => r.data.favorites)
+
+export const addFavorite = (listingId: string) =>
+  client.post(`/user/favorites/${listingId}`).then((r) => r.data)
+
+export const removeFavorite = (listingId: string) =>
+  client.delete(`/user/favorites/${listingId}`).then((r) => r.data)

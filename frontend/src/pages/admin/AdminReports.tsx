@@ -59,26 +59,26 @@ export default function AdminReports() {
 
       {summary && (
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Lifetime Gross Booking Revenue</p>
               <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0"><TrendingUp size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{fmt(summary.lifetimeGross)}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{fmt(summary.lifetimeGross)}</p>
             <p className="text-xs text-ink/40 mt-1">{fmt(summary.monthGross)} this month</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Lifetime Commission Collected</p>
               <div className="w-9 h-9 rounded-lg bg-green/10 text-green flex items-center justify-center shrink-0"><Wallet size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{fmt(summary.lifetimeCommission)}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{fmt(summary.lifetimeCommission)}</p>
             <p className="text-xs text-ink/40 mt-1">{fmt(summary.monthCommission)} this month</p>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <Select value={months} onChange={(e) => setMonths(e.target.value)} options={MONTHS_OPTIONS} />
         <button
           onClick={() => downloadCsv(report, `carparkin-revenue-report-${months}mo.csv`)}
@@ -89,7 +89,7 @@ export default function AdminReports() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

@@ -57,7 +57,7 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={toggleOpen}
-        className="relative w-10 h-10 rounded-full bg-white border border-line shadow flex items-center justify-center text-ink/60 hover:text-green transition-colors"
+        className="relative w-10 h-10 rounded-full bg-surface border border-line shadow flex items-center justify-center text-ink/60 hover:text-green transition-colors"
         aria-label="Notifications"
       >
         <Bell size={18} />
@@ -69,8 +69,8 @@ export default function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl border border-line shadow-lg z-20 max-h-96 overflow-y-auto">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-line sticky top-0 bg-white">
+          <div className="absolute right-0 mt-2 w-80 bg-surface rounded-xl border border-line shadow-lg z-20 max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-line sticky top-0 bg-surface">
               <p className="text-sm font-semibold text-ink">Notifications</p>
               {unreadCount > 0 && (
                 <button onClick={handleMarkAllRead} className="flex items-center gap-1 text-xs font-medium text-green hover:text-green-light transition-colors">

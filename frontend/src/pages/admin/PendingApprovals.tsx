@@ -138,28 +138,28 @@ export default function PendingApprovals() {
       {/* Stat cards */}
       {stats && (
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">Total Pending</p>
               <div className="w-9 h-9 rounded-lg bg-amber/20 text-amber-700 flex items-center justify-center shrink-0"><ClipboardClock size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.totalPending}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.totalPending}</p>
             <p className="text-xs text-amber-700 mt-1">Awaiting review right now</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">Approved Today</p>
               <div className="w-9 h-9 rounded-lg bg-green/10 text-green flex items-center justify-center shrink-0"><CheckCircle2 size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.approvedToday}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.approvedToday}</p>
             <p className="text-xs text-green-600 mt-1">Since midnight</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">Rejected Today</p>
               <div className="w-9 h-9 rounded-lg bg-danger/10 text-danger flex items-center justify-center shrink-0"><XCircle size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.rejectedToday}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.rejectedToday}</p>
             <p className="text-xs text-danger mt-1">
               {stats.topRejectionReason ? `Main reason: ${stats.topRejectionReason}` : 'No rejections yet today'}
             </p>
@@ -168,7 +168,7 @@ export default function PendingApprovals() {
       )}
 
       {/* Search + filters */}
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search by location, owner name, or ID..." className="flex-1 min-w-[220px]" />
         <button
           title="Additional filters aren't available yet"
@@ -187,10 +187,10 @@ export default function PendingApprovals() {
       {/* Pending grid */}
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-96 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-96 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : sorted.length === 0 ? (
-        <div className="bg-white rounded-xl border border-line py-20 text-center">
+        <div className="bg-surface rounded-xl border border-line py-20 text-center">
           <CheckCircle2 size={40} className="text-green mx-auto mb-3" />
           <p className="text-ink font-medium">All caught up!</p>
           <p className="text-ink/40 text-sm mt-1">No listings pending approval.</p>
@@ -198,7 +198,7 @@ export default function PendingApprovals() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sorted.map((l) => (
-            <div key={l.id} className="bg-white rounded-xl border border-line overflow-hidden flex flex-col">
+            <div key={l.id} className="bg-surface rounded-xl border border-line overflow-hidden flex flex-col">
               {/* Image */}
               <div className="relative h-40 bg-concrete shrink-0">
                 {l.images.length > 0 ? (

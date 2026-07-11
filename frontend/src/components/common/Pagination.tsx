@@ -14,7 +14,7 @@ export default function Pagination({ page, totalPages, onChange, className = '' 
           className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
             page === p
               ? 'bg-green text-white border-green'
-              : 'bg-white border-line text-ink/60 hover:bg-concrete hover:border-green/40'
+              : 'bg-surface border-line text-ink/60 hover:bg-concrete hover:border-green/40'
           }`}>
           {p}
         </button>

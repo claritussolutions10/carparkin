@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import {
-  Share2, Heart, Star, ShieldCheck, Car, MapPin, LayoutGrid,
+  Share2, Star, ShieldCheck, Car, MapPin, LayoutGrid,
   Layers, Shield, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import Navbar from '../../components/layout/Navbar'
@@ -9,6 +9,7 @@ import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
 import StaticMap from '../../components/common/StaticMap'
 import DatePicker from '../../components/common/DatePicker'
+import FavoriteButton from '../../components/common/FavoriteButton'
 import { getParkingById, getParkingReviews, type Parking, type ParkingReview } from '../../api/parkings.api'
 import { useAuthStore } from '../../store/authStore'
 
@@ -22,7 +23,17 @@ const GALLERY_TILES = [
 
 const VEHICLE_TOGGLES = ['Sedan', 'SUV', 'Hatch']
 
-function GalleryTile({ index, className = '' }: { index: number; className?: string }) {
+function GalleryTile({
+  index, images, className = '',
+}: { index: number; images: { id: string; url: string }[]; className?: string }) {
+  const photo = images[index]
+  if (photo) {
+    return (
+      <div className={`relative overflow-hidden ${className}`}>
+        <img src={photo.url} alt="" className="w-full h-full object-cover" />
+      </div>
+    )
+  }
   return (
     <div className={`relative bg-gradient-to-br ${GALLERY_TILES[index % GALLERY_TILES.length]} flex items-center justify-center overflow-hidden ${className}`}>
       <Car className="w-10 h-10 text-white/25" strokeWidth={1.5} />
@@ -56,7 +67,7 @@ function ReviewsSection({ parkingId, reviewCount }: { parkingId: string; reviewC
       <h3 className="font-display text-lg font-semibold text-ink mb-3">Reviews {reviewCount > 0 && `(${reviewCount})`}</h3>
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 2 }, (_, i) => <div key={i} className="h-24 bg-white border border-line rounded-lg animate-pulse" />)}
+          {Array.from({ length: 2 }, (_, i) => <div key={i} className="h-24 bg-surface border border-line rounded-lg animate-pulse" />)}
         </div>
       ) : (
         <div className="space-y-3">
@@ -102,7 +113,7 @@ function ReviewsSection({ parkingId, reviewCount }: { parkingId: string; reviewC
               key={p}
               onClick={() => setPage(p)}
               className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
-                page === p ? 'bg-green text-white border-green' : 'bg-white border-line text-ink/60 hover:bg-concrete'
+                page === p ? 'bg-green text-white border-green' : 'bg-surface border-line text-ink/60 hover:bg-concrete'
               }`}
             >
               {p}
@@ -128,7 +139,6 @@ export default function ParkingDetail() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [mapOpen, setMapOpen] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
-  const [saved, setSaved] = useState(false)
   const [shared, setShared] = useState(false)
 
   const [vehicleType, setVehicleType] = useState('Sedan')
@@ -161,10 +171,10 @@ export default function ParkingDetail() {
       <div className="min-h-screen bg-concrete">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 animate-pulse space-y-6">
-          <div className="h-64 bg-white rounded-xl" />
-          <div className="h-8 w-1/2 bg-white rounded-lg" />
-          <div className="h-4 w-1/3 bg-white rounded" />
-          <div className="h-32 bg-white rounded-xl" />
+          <div className="h-64 bg-surface rounded-xl" />
+          <div className="h-8 w-1/2 bg-surface rounded-lg" />
+          <div className="h-4 w-1/3 bg-surface rounded" />
+          <div className="h-32 bg-surface rounded-xl" />
         </div>
       </div>
     )
@@ -192,6 +202,8 @@ export default function ParkingDetail() {
   const isFull = parking.available_spaces === 0
   const lat = parking.latitude != null ? Number(parking.latitude) : null
   const lng = parking.longitude != null ? Number(parking.longitude) : null
+  const images = parking.images ?? []
+  const galleryCount = Math.max(images.length, 1)
 
   return (
     <div className={`min-h-screen bg-concrete ${isAuthenticated ? 'pb-24 lg:pb-8' : ''}`}>
@@ -246,16 +258,11 @@ export default function ParkingDetail() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleShare}
-                className="inline-flex items-center gap-2 rounded-lg border border-line px-3.5 py-2 text-sm font-medium text-ink/70 hover:bg-white transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-line px-3.5 py-2 text-sm font-medium text-ink/70 hover:bg-surface transition-colors"
               >
                 <Share2 size={15} /> {shared ? 'Copied!' : 'Share'}
               </button>
-              <button
-                onClick={() => setSaved((v) => !v)}
-                className="inline-flex items-center gap-2 rounded-lg border border-line px-3.5 py-2 text-sm font-medium text-ink/70 hover:bg-white transition-colors"
-              >
-                <Heart size={15} className={saved ? 'text-danger fill-danger' : ''} /> Save
-              </button>
+              <FavoriteButton listingId={parking.id} showLabel />
             </div>
           )}
         </div>
@@ -264,12 +271,12 @@ export default function ParkingDetail() {
         <div className="mt-5">
           {isAuthenticated ? (
             <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-3 h-[360px] rounded-xl overflow-hidden">
-              <GalleryTile index={0} className="col-span-2 row-span-2 rounded-xl" />
-              <GalleryTile index={1} className="rounded-xl" />
-              <GalleryTile index={2} className="rounded-xl" />
-              <GalleryTile index={3} className="rounded-xl" />
+              <GalleryTile index={0} images={images} className="col-span-2 row-span-2 rounded-xl" />
+              <GalleryTile index={1} images={images} className="rounded-xl" />
+              <GalleryTile index={2} images={images} className="rounded-xl" />
+              <GalleryTile index={3} images={images} className="rounded-xl" />
               <div className="relative rounded-xl overflow-hidden">
-                <GalleryTile index={4} />
+                <GalleryTile index={4} images={images} />
                 <button
                   onClick={() => setGalleryOpen(true)}
                   className="absolute inset-0 bg-black/50 hover:bg-black/60 transition-colors flex flex-col items-center justify-center gap-1 text-white"
@@ -281,29 +288,29 @@ export default function ParkingDetail() {
             </div>
           ) : (
             <div className="hidden sm:block h-[320px] rounded-xl overflow-hidden">
-              <GalleryTile index={0} className="w-full h-full" />
+              <GalleryTile index={0} images={images} className="w-full h-full" />
             </div>
           )}
 
           {/* Mobile: single swipeable image */}
           <div className="sm:hidden relative h-56 rounded-xl overflow-hidden">
-            <GalleryTile index={activeImage} className="w-full h-full" />
+            <GalleryTile index={activeImage} images={images} className="w-full h-full" />
             {isAuthenticated && (
               <>
                 <button
-                  onClick={() => setActiveImage((i) => (i - 1 + GALLERY_TILES.length) % GALLERY_TILES.length)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-ink"
+                  onClick={() => setActiveImage((i) => (i - 1 + galleryCount) % galleryCount)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-slate-700"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
-                  onClick={() => setActiveImage((i) => (i + 1) % GALLERY_TILES.length)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-ink"
+                  onClick={() => setActiveImage((i) => (i + 1) % galleryCount)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-slate-700"
                 >
                   <ChevronRight size={16} />
                 </button>
                 <span className="absolute bottom-2 right-2 rounded-full bg-black/60 text-white text-xs px-2.5 py-1">
-                  {activeImage + 1} / {GALLERY_TILES.length}
+                  {activeImage + 1} / {galleryCount}
                 </span>
               </>
             )}
@@ -315,17 +322,17 @@ export default function ParkingDetail() {
           <div className={isAuthenticated ? 'lg:col-span-2 space-y-8' : 'space-y-8 max-w-3xl'}>
             {isAuthenticated && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white rounded-xl border border-line p-4 text-center">
+                <div className="bg-surface rounded-xl border border-line p-4 text-center">
                   <Layers size={18} className="text-green mx-auto" />
                   <p className="mt-1.5 font-display font-bold text-ink">{parking.total_spaces}</p>
                   <p className="text-xs text-ink/50">Total Slots</p>
                 </div>
-                <div className="bg-white rounded-xl border border-line p-4 text-center">
+                <div className="bg-surface rounded-xl border border-line p-4 text-center">
                   <Car size={18} className="text-green mx-auto" />
                   <p className="mt-1.5 font-display font-bold text-ink">{parking.available_spaces}</p>
                   <p className="text-xs text-ink/50">Available</p>
                 </div>
-                <div className="bg-white rounded-xl border border-line p-4 text-center">
+                <div className="bg-surface rounded-xl border border-line p-4 text-center">
                   <Shield size={18} className="text-green mx-auto" />
                   <p className="mt-1.5 font-display font-bold text-ink">{securityLevel}</p>
                   <p className="text-xs text-ink/50">Security</p>
@@ -386,14 +393,14 @@ export default function ParkingDetail() {
                   {isAuthenticated && (
                     <button
                       onClick={() => setMapOpen(true)}
-                      className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-white rounded-full px-3.5 py-1.5 text-xs font-medium text-ink shadow-md"
+                      className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-surface rounded-full px-3.5 py-1.5 text-xs font-medium text-ink shadow-md"
                     >
                       <MapPin size={13} /> Show on Map
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="h-64 bg-white border border-line rounded-lg flex items-center justify-center text-ink/30 text-sm">
+                <div className="h-64 bg-surface border border-line rounded-lg flex items-center justify-center text-ink/30 text-sm">
                   No location data available
                 </div>
               )}
@@ -426,7 +433,7 @@ export default function ParkingDetail() {
           {/* Booking sidebar — logged in only */}
           {isAuthenticated && (
             <aside className="hidden lg:block">
-              <div className="bg-white rounded-xl border border-line shadow-sm p-6 sticky top-6 space-y-5">
+              <div className="bg-surface rounded-xl border border-line shadow-sm p-6 sticky top-6 space-y-5">
                 <div>
                   <div className="flex items-center justify-between">
                     <p className="font-display text-2xl font-bold text-ink">
@@ -497,7 +504,7 @@ export default function ParkingDetail() {
 
       {/* Mobile booking bar — logged in only */}
       {isAuthenticated && (
-        <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white/90 backdrop-blur-md border-t border-line px-6 py-4 flex items-center justify-between">
+        <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-surface/90 backdrop-blur-md border-t border-line px-6 py-4 flex items-center justify-between">
           <div>
             <p className="font-display text-xl font-semibold text-green">
               ₹{Number(parking.price_per_month).toLocaleString('en-IN')}
@@ -514,8 +521,8 @@ export default function ParkingDetail() {
       {isAuthenticated && (
         <Modal open={galleryOpen} onClose={() => setGalleryOpen(false)} title="All photos" maxWidth="max-w-3xl">
           <div className="grid grid-cols-2 gap-3">
-            {GALLERY_TILES.map((_, i) => (
-              <GalleryTile key={i} index={i} className="h-48 rounded-lg" />
+            {Array.from({ length: galleryCount }, (_, i) => (
+              <GalleryTile key={i} index={i} images={images} className="h-48 rounded-lg" />
             ))}
           </div>
         </Modal>

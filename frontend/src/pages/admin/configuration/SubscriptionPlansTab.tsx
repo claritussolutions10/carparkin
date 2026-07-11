@@ -61,7 +61,7 @@ export default function SubscriptionPlansTab() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-line p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <div className="flex items-start justify-between gap-3 mb-1">
         <div>
           <h2 className="font-display font-semibold text-ink">Subscription Plans</h2>

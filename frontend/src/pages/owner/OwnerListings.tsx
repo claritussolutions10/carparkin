@@ -45,7 +45,7 @@ export default function OwnerListings() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="h-48 bg-white rounded-xl border border-line animate-pulse" />
+            <div key={i} className="h-48 bg-surface rounded-xl border border-line animate-pulse" />
           ))}
         </div>
       ) : parkings.length === 0 ? (
@@ -59,9 +59,13 @@ export default function OwnerListings() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {parkings.map((p) => (
-            <div key={p.id} className="bg-white rounded-xl border border-line overflow-hidden hover:shadow-md transition-shadow">
-              <div className="h-32 bg-gradient-to-br from-green to-green-light flex items-center justify-center">
-                <MapPin size={32} className="text-white/30" />
+            <div key={p.id} className="bg-surface rounded-xl border border-line overflow-hidden hover:shadow-md transition-shadow">
+              <div className="h-32 bg-gradient-to-br from-green to-green-light flex items-center justify-center overflow-hidden">
+                {p.images?.[0]?.url ? (
+                  <img src={p.images[0].url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <MapPin size={32} className="text-white/30" />
+                )}
               </div>
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">

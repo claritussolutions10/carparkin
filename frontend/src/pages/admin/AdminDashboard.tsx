@@ -12,6 +12,8 @@ import SearchInput from '../../components/common/SearchInput'
 import Select from '../../components/common/Select'
 import Badge from '../../components/common/Badge'
 import NotificationBell from '../../components/common/NotificationBell'
+import { useThemeStore } from '../../store/themeStore'
+import { chartTheme } from '../../lib/chartTheme'
 
 function fmt(n: number) { return `₹${Number(n).toLocaleString('en-IN')}` }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) }
@@ -40,6 +42,8 @@ function paymentLabel(status: string) {
 }
 
 export default function AdminDashboard() {
+  const { theme } = useThemeStore()
+  const { grid, tick } = chartTheme(theme === 'dark')
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -96,7 +100,7 @@ export default function AdminDashboard() {
           <NotificationBell />
           <button
             title="Help"
-            className="w-10 h-10 rounded-full bg-white border border-line shadow-sm flex items-center justify-center text-ink/60 hover:text-green transition-colors"
+            className="w-10 h-10 rounded-full bg-surface border border-line shadow-sm flex items-center justify-center text-ink/60 hover:text-green transition-colors"
             aria-label="Help"
           >
             <HelpCircle size={18} />
@@ -131,7 +135,7 @@ export default function AdminDashboard() {
 
       {/* Chart row */}
       <div className="grid lg:grid-cols-[65fr_35fr] gap-6 mb-6">
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="font-display font-semibold text-ink">Monthly Booking Volume</h2>
@@ -150,9 +154,9 @@ export default function AdminDashboard() {
                     <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#D7DBE0" vertical={false} />
-                <XAxis dataKey="date" tickFormatter={fmtChartDate} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={fmtChartDate} tick={{ fontSize: 11, fill: tick }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: tick }} axisLine={false} tickLine={false} />
                 <Tooltip formatter={(v: number) => [`${v} Bookings`, '']} labelFormatter={fmtChartDate} />
                 <Area type="monotone" dataKey="bookings" stroke="#3B82F6" strokeWidth={2} fill="url(#bookingFill)" />
               </AreaChart>
@@ -160,7 +164,7 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <h2 className="font-display font-semibold text-ink">Live Activity</h2>
           <p className="text-xs text-ink/40 mt-0.5 mb-4">Current active parking spots</p>
 
@@ -185,7 +189,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Transactions */}
-      <div className="bg-white rounded-xl border border-line p-5">
+      <div className="bg-surface rounded-xl border border-line p-5">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <h2 className="font-display font-semibold text-ink">Recent Transactions</h2>
           <button

@@ -85,6 +85,7 @@ export default function MyBookings() {
   const [page, setPage] = useState(1)
   const [cancelTarget, setCancelTarget] = useState<UserBooking | null>(null)
   const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState('')
   const [passTarget, setPassTarget] = useState<UserBooking | null>(null)
   const [detailsTarget, setDetailsTarget] = useState<{ booking: UserBooking; title: string } | null>(null)
 
@@ -135,11 +136,14 @@ export default function MyBookings() {
   const handleCancel = async () => {
     if (!cancelTarget) return
     setCancelling(true)
+    setCancelError('')
     try {
       await cancelUserBooking(cancelTarget.id)
       setBookings((prev) => prev.map((b) => (b.id === cancelTarget.id ? { ...b, status: 'cancelled' } : b)))
       setCancelTarget(null)
-    } catch { /* keep dialog open on failure */ } finally { setCancelling(false) }
+    } catch (err: any) {
+      setCancelError(err?.response?.data?.error ?? 'Could not cancel this booking. Please try again.')
+    } finally { setCancelling(false) }
   }
 
   const openReview = (b: UserBooking) => {
@@ -197,7 +201,7 @@ export default function MyBookings() {
       </div>
 
       {/* Filter + search bar */}
-      <div className="bg-white rounded-xl border border-line p-3 flex items-center justify-between gap-3 flex-wrap mb-6">
+      <div className="bg-surface rounded-xl border border-line p-3 flex items-center justify-between gap-3 flex-wrap mb-6">
         <div className="flex items-center gap-1 overflow-x-auto">
           {TABS.map((t) => (
             <button
@@ -226,10 +230,10 @@ export default function MyBookings() {
       <div className="space-y-4">
         {loading ? (
           Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="h-32 bg-white rounded-xl border border-line animate-pulse" />
+            <div key={i} className="h-32 bg-surface rounded-xl border border-line animate-pulse" />
           ))
         ) : pageItems.length === 0 ? (
-          <div className="bg-white rounded-xl border border-line py-16 text-center text-sm text-ink/40">
+          <div className="bg-surface rounded-xl border border-line py-16 text-center text-sm text-ink/40">
             No bookings found.
           </div>
         ) : (
@@ -241,7 +245,7 @@ export default function MyBookings() {
             return (
               <div
                 key={b.id}
-                className={`bg-white rounded-xl p-4 md:p-5 flex flex-col lg:flex-row lg:items-center gap-4 border ${
+                className={`bg-surface rounded-xl p-4 md:p-5 flex flex-col lg:flex-row lg:items-center gap-4 border ${
                   variant === 'active' ? 'border-line border-l-4 !border-l-green bg-green-50/40' : 'border-line'
                 }`}
               >
@@ -295,7 +299,7 @@ export default function MyBookings() {
                 <div className="flex gap-2 shrink-0 lg:w-auto w-full">
                   {variant === 'active' && (
                     <>
-                      <Button variant="secondary" className="flex-1 lg:flex-none" onClick={() => setCancelTarget(b)}>Manage</Button>
+                      <Button variant="secondary" className="flex-1 lg:flex-none" onClick={() => { setCancelTarget(b); setCancelError('') }}>Manage</Button>
                       <Button className="flex-1 lg:flex-none" onClick={() => setPassTarget(b)}>View Pass</Button>
                     </>
                   )}
@@ -353,7 +357,7 @@ export default function MyBookings() {
               key={p}
               onClick={() => setPage(p)}
               className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
-                page === p ? 'bg-green text-white border-green' : 'bg-white border-line text-ink/60 hover:bg-concrete hover:border-green/40'
+                page === p ? 'bg-green text-white border-green' : 'bg-surface border-line text-ink/60 hover:bg-concrete hover:border-green/40'
               }`}
             >
               {p}
@@ -375,8 +379,9 @@ export default function MyBookings() {
         title="Cancel booking"
         message="Are you sure you want to cancel this booking? This cannot be undone."
         onConfirm={handleCancel}
-        onCancel={() => setCancelTarget(null)}
+        onCancel={() => { setCancelTarget(null); setCancelError('') }}
         loading={cancelling}
+        error={cancelError}
       />
 
       <Modal open={!!passTarget} onClose={() => setPassTarget(null)} title="Digital Pass">

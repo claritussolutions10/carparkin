@@ -105,7 +105,7 @@ function VerificationPanel({
       </div>
       {detail && <div className="mt-2 text-xs text-ink/60">{detail}</div>}
       {docUrl && (
-        <a href={docUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-navy hover:text-green transition-colors mt-2">
+        <a href={docUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-green transition-colors mt-2">
           <FileText size={12} /> View submitted document
         </a>
       )}
@@ -321,7 +321,7 @@ export default function AdminOwners() {
       </div>
 
       {/* Search + filters */}
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search by name, email, or phone number..." className="flex-1 min-w-[220px]" />
         <Select value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status: All" options={STATUS_OPTIONS} />
         <Select value={joined} onChange={(e) => setJoined(e.target.value)} options={JOINED_OPTIONS} />
@@ -364,7 +364,7 @@ export default function AdminOwners() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

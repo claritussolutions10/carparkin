@@ -51,7 +51,7 @@ function DetailsCell({ details }: { details: Record<string, unknown> | null }) {
   if (!details || Object.keys(details).length === 0) return <span className="text-ink/30">–</span>
   return (
     <div>
-      <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-1 text-xs font-medium text-navy hover:text-green transition-colors">
+      <button onClick={() => setOpen((v) => !v)} className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-green transition-colors">
         <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} /> {open ? 'Hide' : 'View'}
       </button>
       {open && (
@@ -101,13 +101,13 @@ export default function AdminAuditLog() {
         <p className="text-sm text-ink/50 mt-1">Every mutation made from the admin console - who changed what, and when.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <Select value={action} onChange={(e) => setAction(e.target.value)} placeholder="All Actions" options={ACTION_OPTIONS} />
         <Select value={entityType} onChange={(e) => setEntityType(e.target.value)} placeholder="All Entity Types" options={ENTITY_TYPE_OPTIONS} />
         <span className="ml-auto text-sm text-ink/40">{total} entr{total === 1 ? 'y' : 'ies'}</span>
       </div>
 
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

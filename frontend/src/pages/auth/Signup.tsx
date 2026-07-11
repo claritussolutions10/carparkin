@@ -3,8 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, Star, User, MapPin, IndianRupee, ShieldCheck } from 'lucide-react'
 import Input from '../../components/common/Input'
 import Button from '../../components/common/Button'
-import BarrierGate from '../../components/common/BarrierGate'
-import CitySkyline from '../../components/common/CitySkyline'
+import authImage from '../../assets/auth-illustration.png'
 import { signup } from '../../api/auth.api'
 import { useAuthStore } from '../../store/authStore'
 
@@ -37,7 +36,6 @@ export default function Signup() {
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [gateOpen, setGateOpen] = useState(false)
 
   const strength = useMemo(() => passwordStrength(password), [password])
   const confirmMismatch = confirmPassword.length > 0 && confirmPassword !== password
@@ -65,9 +63,8 @@ export default function Signup() {
         role,
       })
       setAuth(user, token)
-      setGateOpen(true)
       const dest = role === 'owner' ? '/owner/dashboard' : '/user/dashboard'
-      setTimeout(() => navigate(dest), 600)
+      navigate(dest)
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.response?.data?.message || 'Could not create account')
       setLoading(false)
@@ -76,17 +73,17 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen bg-concrete flex flex-col">
-      <header className="bg-white border-b border-line">
+      <header className="bg-surface border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <MapPin className="text-green" size={24} fill="currentColor" strokeWidth={1.5} />
-            <span className="font-display text-lg font-semibold text-navy">Carparkin.in</span>
+            <span className="font-display text-lg font-semibold text-ink">Carparkin.in</span>
           </Link>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline text-sm text-ink/50">Already a member?</span>
             <Link
               to="/login"
-              className="rounded-full bg-green-100 text-ink text-sm font-medium px-4 py-2 hover:bg-green-200 transition-colors"
+              className="rounded-full bg-green-100 text-green-700 text-sm font-medium px-4 py-2 hover:bg-green-200 transition-colors"
             >
               Login
             </Link>
@@ -95,7 +92,7 @@ export default function Signup() {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-10 md:py-16">
-        <div className="w-full max-w-[1200px] bg-white rounded-xl shadow-lg border border-line overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        <div className="w-full max-w-[1200px] bg-surface rounded-xl shadow-lg border border-line overflow-hidden grid grid-cols-1 md:grid-cols-2">
           {/* Left: form */}
           <div className="p-8 md:p-12 flex flex-col justify-center">
             <div className="grid grid-cols-2 gap-2 mb-6 rounded-lg bg-concrete p-1">
@@ -105,7 +102,7 @@ export default function Signup() {
                   type="button"
                   onClick={() => setRole(r)}
                   className={`py-2 rounded-md text-sm font-medium transition-all ${
-                    role === r ? 'bg-white text-ink shadow-sm' : 'text-ink/50 hover:text-ink/70'
+                    role === r ? 'bg-surface text-ink shadow-sm' : 'text-ink/50 hover:text-ink/70'
                   }`}
                 >
                   {r === 'user' ? "I'm a Driver" : "I'm an Owner"}
@@ -223,15 +220,10 @@ export default function Signup() {
 
           {/* Right: image + barrier */}
           <div className="hidden md:flex relative bg-navy">
-            <div className="absolute inset-0 bg-gradient-to-br from-navy to-navy-light" />
-            <CitySkyline className="absolute bottom-0 left-0 w-full h-1/2 text-black/25" />
+            <img src={authImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-            <div className="relative flex-1 flex flex-col justify-between p-8">
-              <div className="flex justify-center pt-4">
-                <BarrierGate open={gateOpen} />
-              </div>
-
+            <div className="relative flex-1 flex flex-col justify-end p-8">
               {isOwner ? (
                 <div>
                   <h2 className="font-display text-2xl font-bold text-white leading-snug">

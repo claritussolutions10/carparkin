@@ -33,7 +33,7 @@ const VALUES = [
 
 export default function AboutUs() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-surface">
       <PublicHeader />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,7 +75,7 @@ export default function AboutUs() {
             <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-navy to-navy-light overflow-hidden flex items-center justify-center">
               <CitySkyline className="w-full h-2/3 text-white/15 self-end" />
             </div>
-            <div className="hidden sm:block absolute -bottom-6 -right-4 md:-right-8 max-w-[280px] bg-white rounded-lg shadow-lg border border-line p-5">
+            <div className="hidden sm:block absolute -bottom-6 -right-4 md:-right-8 max-w-[280px] bg-surface rounded-lg shadow-lg border border-line p-5">
               <Quote className="text-green" size={20} />
               <p className="mt-2 font-body italic text-sm text-ink/70 leading-relaxed">
                 We believe parking shouldn't be a daily struggle. It should be the easiest part of your journey.
@@ -96,7 +96,7 @@ export default function AboutUs() {
 
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {PILLARS.map((pillar) => (
-                <div key={pillar.title} className="bg-white rounded-xl border border-line p-6 md:p-8">
+                <div key={pillar.title} className="bg-surface rounded-xl border border-line p-6 md:p-8">
                   <div className="w-11 h-11 rounded-lg bg-green flex items-center justify-center">
                     <pillar.icon className="text-white" size={20} />
                   </div>

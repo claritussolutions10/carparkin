@@ -1,18 +1,12 @@
-import { useEffect, useState, type FormEvent, type SVGProps } from 'react'
+import { useState, type FormEvent, type SVGProps } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, Star, User, MapPin } from 'lucide-react'
 import Input from '../../components/common/Input'
 import Button from '../../components/common/Button'
-import BarrierGate from '../../components/common/BarrierGate'
-import CitySkyline from '../../components/common/CitySkyline'
+import authImage from '../../assets/auth-illustration.png'
 import { login } from '../../api/auth.api'
 import { useAuthStore } from '../../store/authStore'
-
-function roleHome(role: string) {
-  if (role === 'admin') return '/admin/dashboard'
-  if (role === 'owner') return '/owner/dashboard'
-  return '/user/dashboard'
-}
+import { roleHome } from '../../lib/roleHome'
 
 function GoogleIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -30,18 +24,11 @@ export default function Login() {
   const [searchParams] = useSearchParams()
   const setAuth = useAuthStore((s) => s.setAuth)
 
-  const [mounted, setMounted] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [gateOpen, setGateOpen] = useState(false)
-
-  useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 100)
-    return () => clearTimeout(t)
-  }, [])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -50,11 +37,10 @@ export default function Login() {
     try {
       const { token, user } = await login({ email, password })
       setAuth(user, token)
-      setGateOpen(true)
       const returnTo = searchParams.get('returnTo')
       const isSafeReturnTo = !!returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//')
       const dest = isSafeReturnTo ? returnTo : roleHome(user.role)
-      setTimeout(() => navigate(dest), 600)
+      navigate(dest)
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.response?.data?.message || 'Invalid email or password')
       setLoading(false)
@@ -67,17 +53,17 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-concrete flex flex-col">
-      <header className="bg-white border-b border-line">
+      <header className="bg-surface border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <MapPin className="text-green" size={24} fill="currentColor" strokeWidth={1.5} />
-            <span className="font-display text-lg font-semibold text-navy">Carparkin.in</span>
+            <span className="font-display text-lg font-semibold text-ink">Carparkin.in</span>
           </Link>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline text-sm text-ink/50">New to Carparkin?</span>
             <Link
               to="/signup"
-              className="rounded-full bg-green-100 text-ink text-sm font-medium px-4 py-2 hover:bg-green-200 transition-colors"
+              className="rounded-full bg-green-100 text-green-700 text-sm font-medium px-4 py-2 hover:bg-green-200 transition-colors"
             >
               Sign Up
             </Link>
@@ -86,7 +72,7 @@ export default function Login() {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-10 md:py-16">
-        <div className="w-full max-w-[1200px] bg-white rounded-xl shadow-lg border border-line overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        <div className="w-full max-w-[1200px] bg-surface rounded-xl shadow-lg border border-line overflow-hidden grid grid-cols-1 md:grid-cols-2">
           {/* Left: form */}
           <div className="p-8 md:p-12 flex flex-col justify-center">
             <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Welcome back</h1>
@@ -144,7 +130,7 @@ export default function Login() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-line bg-white py-2.5 text-sm font-medium text-ink hover:bg-concrete transition-colors"
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-line bg-surface py-2.5 text-sm font-medium text-ink hover:bg-concrete transition-colors"
             >
               <GoogleIcon width={16} height={16} />
               Google
@@ -160,15 +146,10 @@ export default function Login() {
 
           {/* Right: image + barrier */}
           <div className="hidden md:flex relative bg-navy">
-            <div className="absolute inset-0 bg-gradient-to-br from-navy to-navy-light" />
-            <CitySkyline className="absolute bottom-0 left-0 w-full h-1/2 text-black/25" />
+            <img src={authImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-            <div className="relative flex-1 flex flex-col justify-between p-8">
-              <div className="flex justify-center pt-4">
-                <BarrierGate open={!mounted || gateOpen} />
-              </div>
-
+            <div className="relative flex-1 flex flex-col justify-end p-8">
               <div>
                 <div className="w-10 h-10 rounded-lg bg-green flex items-center justify-center">
                   <span className="font-display font-bold text-white">P</span>

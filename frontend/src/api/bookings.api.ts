@@ -54,17 +54,19 @@ export const createBooking = (data: {
   endDate: string
 }) => client.post<{ booking: BookingRecord; message: string }>('/bookings', data).then((r) => r.data)
 
-export const confirmBooking = (bookingId: string, razorpayPaymentId?: string) =>
-  client.post<{ booking: BookingRecord }>(`/bookings/${bookingId}/confirm`, {
-    razorpayPaymentId,
-  }).then((r) => r.data.booking)
+export interface RazorpayOrder {
+  orderId: string
+  amount: number
+  currency: string
+  keyId: string
+}
 
-export const processTestPayment = (bookingId: string, amount: number) =>
-  client.post<{
-    success: boolean
-    paymentId: string
-    status: string
-    message: string
-    bookingId: string
-    amount: number
-  }>('/payments/test/process', { bookingId, amount }).then((r) => r.data)
+export const createPaymentOrder = (bookingId: string) =>
+  client.post<RazorpayOrder>('/payments/orders', { bookingId }).then((r) => r.data)
+
+export const verifyPayment = (bookingId: string, data: {
+  razorpay_order_id: string
+  razorpay_payment_id: string
+  razorpay_signature: string
+}) =>
+  client.post<{ booking: BookingRecord; message: string }>('/payments/verify', { bookingId, ...data }).then((r) => r.data.booking)

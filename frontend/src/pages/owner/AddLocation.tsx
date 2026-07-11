@@ -130,15 +130,16 @@ export default function AddLocation() {
       const evAmenity = amenitiesList.find((a) => a.name.toLowerCase().includes('ev charging'))
       const amenityIds = features.ev && evAmenity ? [evAmenity.id] : []
 
-      // No dedicated city/pin_code columns exist on parking_listings — the
-      // schema only stores one free-text address field, so the user's city
-      // and PIN entries are composed into it rather than silently dropped.
+      // pin_code has no dedicated column, so it's folded into the display
+      // address; city is now a real column (see 024_listing_city.sql) so it's
+      // sent separately too, for city-filtered search/SEO landing pages.
       const fullAddress = [address.trim(), city.trim(), pinCode.trim()].filter(Boolean).join(', ')
 
       await createParking({
         title: title.trim(),
         description: description.trim() || undefined,
         address: fullAddress,
+        city: city.trim() || undefined,
         latitude,
         longitude,
         total_spaces: Number(totalSpaces),
@@ -178,7 +179,7 @@ export default function AddLocation() {
       <form onSubmit={handleSubmit} className="grid lg:grid-cols-[65fr_35fr] gap-6 items-start">
         {/* Main form column */}
         <div className="min-w-0 space-y-6">
-          <div className="bg-white rounded-xl border border-line p-6 divide-y divide-line">
+          <div className="bg-surface rounded-xl border border-line p-6 divide-y divide-line">
             {/* Section 1 */}
             <div className="pb-6">
               <SectionHeading n={1} title="Basic Details" />
@@ -257,7 +258,7 @@ export default function AddLocation() {
                         }}
                       />
                     </Map>
-                    <span className="absolute top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-white rounded-full px-3.5 py-1.5 text-xs font-medium text-ink shadow-md pointer-events-none">
+                    <span className="absolute top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-surface rounded-full px-3.5 py-1.5 text-xs font-medium text-ink shadow-md pointer-events-none">
                       <MapPin size={12} /> Drag pin to adjust
                     </span>
                   </div>
@@ -332,7 +333,7 @@ export default function AddLocation() {
 
         {/* Right sidebar */}
         <div className="space-y-6 min-w-0 lg:sticky lg:top-10">
-          <div className="bg-white rounded-xl border border-line p-6 text-center">
+          <div className="bg-surface rounded-xl border border-line p-6 text-center">
             <ProgressRing percent={completionPct} />
             <p className="font-display font-semibold text-ink mt-3">
               {completionPct >= 100 ? 'Your listing is ready!' : 'Your listing is almost ready!'}

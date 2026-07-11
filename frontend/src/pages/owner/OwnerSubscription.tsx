@@ -72,7 +72,7 @@ export default function OwnerSubscription() {
           const isCurrent = currentPlanName === plan.name
           return (
             <div key={plan.id}
-              className={`bg-white rounded-xl border-2 p-6 transition-all ${
+              className={`bg-surface rounded-xl border-2 p-6 transition-all ${
                 isCurrent ? 'border-green shadow-lg' : 'border-line hover:border-green/30'
               }`}>
               {isCurrent && (

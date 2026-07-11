@@ -49,7 +49,7 @@ const SUBJECT_OPTIONS = [
 function FaqItem({ id, question, answer }: { id: string; question: string; answer: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div id={id} className="bg-white rounded-xl border border-line overflow-hidden">
+    <div id={id} className="bg-surface rounded-xl border border-line overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
@@ -133,7 +133,7 @@ export default function Support() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search for help..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-line text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-green/30 focus:border-green"
+            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface border border-line text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-green/30 focus:border-green"
           />
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function Support() {
                 <button
                   key={t.key}
                   onClick={scrollToFaqs}
-                  className="bg-white rounded-xl border border-line p-6 text-center hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                  className="bg-surface rounded-xl border border-line p-6 text-center hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
                     <t.icon size={20} className="text-green" />
@@ -165,7 +165,7 @@ export default function Support() {
           <div ref={faqRef}>
             <h2 className="font-display text-xl font-bold text-ink mb-4">Frequently Asked Questions</h2>
             {filteredFaqs.length === 0 ? (
-              <div className="bg-white rounded-xl border border-line py-12 text-center text-sm text-ink/40">
+              <div className="bg-surface rounded-xl border border-line py-12 text-center text-sm text-ink/40">
                 No results for "{search}".
               </div>
             ) : (
@@ -179,7 +179,7 @@ export default function Support() {
         {/* Right column (sticky) */}
         <div className="space-y-6 min-w-0 lg:sticky lg:top-10 lg:self-start">
           {/* Send us a message */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 rounded-lg bg-green flex items-center justify-center shrink-0">
                 <Mail size={16} className="text-white" />
@@ -224,7 +224,7 @@ export default function Support() {
 
           {/* Your Recent Tickets */}
           {!ticketsLoading && tickets.length > 0 && (
-            <div className="bg-white rounded-xl border border-line p-6">
+            <div className="bg-surface rounded-xl border border-line p-6">
               <h2 className="font-display font-semibold text-ink mb-4">Your Recent Tickets</h2>
               <div className="space-y-4">
                 {tickets.slice(0, 5).map((t) => (
@@ -279,7 +279,7 @@ export default function Support() {
           </div>
 
           {/* Community Forum — no forum exists yet, kept as a clearly decorative, non-navigating card */}
-          <div className="bg-white rounded-xl border border-line p-5 flex items-center gap-4">
+          <div className="bg-surface rounded-xl border border-line p-5 flex items-center gap-4">
             <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
               <Users size={18} className="text-blue-500" />
             </div>

@@ -2,6 +2,8 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, MapPin, CalendarDays, TrendingUp, Star, User, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
+import { useLogoUrl } from '../../hooks/useLogoUrl'
+import ThemeToggle from '../common/ThemeToggle'
 
 const NAV = [
   { to: '/owner/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -16,19 +18,25 @@ export default function OwnerLayout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const logoUrl = useLogoUrl()
 
   const handleLogout = () => { logout(); navigate('/login') }
 
   const Sidebar = () => (
-    <aside className="w-[280px] bg-white border-r border-line flex flex-col h-full">
+    <aside className="w-[280px] bg-surface border-r border-line flex flex-col h-full">
       <div className="px-6 py-5 border-b border-line flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-green flex items-center justify-center shrink-0">
-          <span className="font-display font-bold text-white text-sm">P</span>
-        </div>
-        <div className="min-w-0">
-          <span className="font-display text-base font-semibold text-navy block leading-tight">Carparkin.in</span>
+        {logoUrl ? (
+          <img src={logoUrl} alt="Carparkin.in" className="h-8 w-auto object-contain shrink-0" />
+        ) : (
+          <div className="w-8 h-8 rounded-lg bg-green flex items-center justify-center shrink-0">
+            <span className="font-display font-bold text-white text-sm">P</span>
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <span className="font-display text-base font-semibold text-ink block leading-tight">Carparkin.in</span>
           <p className="text-xs text-ink/40 leading-tight">Owner Portal</p>
         </div>
+        <ThemeToggle />
       </div>
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {NAV.map(({ to, icon: Icon, label, end }) => (
@@ -45,8 +53,12 @@ export default function OwnerLayout() {
       </nav>
       <div className="px-3 py-4 border-t border-line">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-8 h-8 rounded-full bg-navy text-white text-xs flex items-center justify-center font-medium">
-            {user?.full_name?.[0] ?? 'O'}
+          <div className="w-8 h-8 rounded-full bg-navy text-white text-xs flex items-center justify-center font-medium overflow-hidden shrink-0">
+            {user?.profile_picture ? (
+              <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
+            ) : (
+              user?.full_name?.[0] ?? 'O'
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-ink truncate">{user?.full_name}</p>
@@ -80,11 +92,11 @@ export default function OwnerLayout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-line px-6 py-4 flex items-center gap-4 lg:hidden">
+        <header className="bg-surface border-b border-line px-6 py-4 flex items-center gap-4 lg:hidden">
           <button onClick={() => setOpen(true)} className="p-1.5 rounded-lg hover:bg-concrete">
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <span className="font-display font-semibold text-navy">Carparkin.in</span>
+          <span className="font-display font-semibold text-ink">Carparkin.in</span>
         </header>
         <main className="flex-1 overflow-y-auto">
           <Outlet />

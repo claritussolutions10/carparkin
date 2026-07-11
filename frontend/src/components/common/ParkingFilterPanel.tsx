@@ -1,5 +1,6 @@
 import { MapPin, RotateCcw } from 'lucide-react'
 import Button from './Button'
+import LocationAutocomplete from './LocationAutocomplete'
 import { AMENITY_FILTERS, PRICE_MAX, PRICE_MIN, VEHICLE_TYPES, toggleSet } from '../../lib/parkingFilters'
 
 interface PriceRangeSliderProps {
@@ -67,6 +68,7 @@ function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
 interface ParkingFilterPanelProps {
   location: string
   onLocationChange: (v: string) => void
+  onLocationSelect: (coords: { lat: number; lng: number }) => void
   minPrice: number
   maxPrice: number
   onPriceChange: (min: number, max: number) => void
@@ -79,7 +81,7 @@ interface ParkingFilterPanelProps {
 }
 
 export default function ParkingFilterPanel({
-  location, onLocationChange,
+  location, onLocationChange, onLocationSelect,
   minPrice, maxPrice, onPriceChange,
   vehicleTypes, onVehicleTypesChange,
   amenities, onAmenitiesChange,
@@ -98,9 +100,10 @@ export default function ParkingFilterPanel({
         <label className="block text-sm font-medium text-ink mb-1.5">Location</label>
         <div className="relative">
           <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40" />
-          <input
+          <LocationAutocomplete
             value={location}
-            onChange={(e) => onLocationChange(e.target.value)}
+            onChange={onLocationChange}
+            onSelect={(r) => { onLocationChange(r.description); onLocationSelect({ lat: r.lat, lng: r.lng }) }}
             placeholder="e.g. Indiranagar"
             className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-line text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-green/30 focus:border-green"
           />

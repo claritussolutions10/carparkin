@@ -30,6 +30,7 @@ export interface ParkingListingRow {
   title: string;
   description: string | null;
   address: string;
+  city: string | null;
   latitude: number;
   longitude: number;
   total_spaces: number;
@@ -104,6 +105,7 @@ export interface SearchFilters {
   longitude?: number;
   radius?: number;
   query?: string;
+  cities?: string[];
   minPrice?: number;
   maxPrice?: number;
   page?: number;

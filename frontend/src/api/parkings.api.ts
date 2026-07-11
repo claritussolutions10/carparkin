@@ -6,6 +6,7 @@ export interface Parking {
   title: string
   description: string | null
   address: string
+  city: string | null
   latitude: number | null
   longitude: number | null
   price_per_month: number
@@ -20,6 +21,8 @@ export interface Parking {
   parking_type: string | null
   owner_name: string | null
   distance_km?: number
+  // Present on search results (first uploaded photo, if any) - cheap thumbnail for cards.
+  thumbnail_url?: string | null
   // Only present on the single-listing detail response (getParkingById), not search results.
   amenities?: { id: number; name: string; icon: string }[]
   images?: { id: string; url: string }[]
@@ -28,7 +31,8 @@ export interface Parking {
 export interface SearchFilters {
   lat?: number
   lng?: number
-  city?: string
+  q?: string
+  cities?: string[]
   minPrice?: number
   maxPrice?: number
   page?: number
@@ -46,13 +50,22 @@ export const searchParkings = (filters: SearchFilters) => {
   const params = new URLSearchParams()
   if (filters.lat) params.set('lat', String(filters.lat))
   if (filters.lng) params.set('lng', String(filters.lng))
-  if (filters.city) params.set('city', filters.city)
+  if (filters.q) params.set('q', filters.q)
+  if (filters.cities?.length) params.set('cities', filters.cities.join(','))
   if (filters.minPrice) params.set('minPrice', String(filters.minPrice))
   if (filters.maxPrice) params.set('maxPrice', String(filters.maxPrice))
   if (filters.page) params.set('page', String(filters.page))
   if (filters.limit) params.set('limit', String(filters.limit))
   return client.get<SearchResponse>(`/parkings?${params}`).then((r) => r.data)
 }
+
+export interface CityListing {
+  city: string
+  count: number
+}
+
+export const getListingCities = () =>
+  client.get<{ cities: CityListing[] }>('/parkings/cities').then((r) => r.data.cities)
 
 export const getParkingById = (id: string) =>
   client.get<{ parking: Parking }>(`/parkings/${id}`).then((r) => r.data.parking)
@@ -81,6 +94,7 @@ export interface OwnerParking {
   title: string
   description: string | null
   address: string
+  city: string | null
   latitude: number | null
   longitude: number | null
   total_spaces: number
@@ -105,6 +119,7 @@ export interface OwnerParkingInput {
   title: string
   description?: string
   address: string
+  city?: string
   latitude?: number
   longitude?: number
   total_spaces: number
@@ -122,6 +137,7 @@ export interface OwnerParkingUpdateInput {
   title?: string
   description?: string
   address?: string
+  city?: string
   latitude?: number
   longitude?: number
   total_spaces?: number

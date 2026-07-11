@@ -46,7 +46,7 @@ const SECTIONS = [
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-surface">
       <PublicHeader />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <h1 className="font-display text-3xl md:text-4xl font-bold text-ink">Privacy Policy</h1>

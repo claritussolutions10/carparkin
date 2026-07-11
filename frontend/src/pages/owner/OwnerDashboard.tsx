@@ -5,11 +5,13 @@ import {
 } from 'recharts'
 import { Plus, IndianRupee, Car, MapPin, ArrowUp, ArrowDown } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { useThemeStore } from '../../store/themeStore'
 import { getOwnerDashboard, getMonthlyEarnings, type OwnerDashboard, type MonthlyEarning } from '../../api/owner.api'
 import { getOwnerParkings, type OwnerParking } from '../../api/parkings.api'
 import StatCard from '../../components/common/StatCard'
 import Badge from '../../components/common/Badge'
 import Select from '../../components/common/Select'
+import { chartTheme } from '../../lib/chartTheme'
 
 function fmt(n: number) { return `₹${Number(n).toLocaleString('en-IN')}` }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) }
@@ -44,6 +46,8 @@ function TrendRow({ pct, caption }: { pct: number | null; caption: string }) {
 
 export default function OwnerDashboardPage() {
   const { user } = useAuthStore()
+  const { theme } = useThemeStore()
+  const { grid, tick } = chartTheme(theme === 'dark')
   const navigate = useNavigate()
 
   const [data, setData] = useState<OwnerDashboard | null>(null)
@@ -103,7 +107,7 @@ export default function OwnerDashboardPage() {
 
       {loading ? (
         <div className="grid md:grid-cols-3 gap-6 mb-6">
-          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : data ? (
         <>
@@ -134,7 +138,7 @@ export default function OwnerDashboardPage() {
 
           {/* Revenue Overview + Location Status */}
           <div className="grid lg:grid-cols-[65fr_35fr] gap-6 mb-6">
-            <div className="bg-white rounded-xl border border-line p-5">
+            <div className="bg-surface rounded-xl border border-line p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display font-semibold text-ink">Revenue Overview</h2>
                 <Select
@@ -154,10 +158,10 @@ export default function OwnerDashboardPage() {
                         <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#D7DBE0" vertical={false} />
-                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: tick }} axisLine={false} tickLine={false} />
                     <YAxis
-                      tick={{ fontSize: 11, fill: '#6B7280' }}
+                      tick={{ fontSize: 11, fill: tick }}
                       axisLine={false}
                       tickLine={false}
                       tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
@@ -169,7 +173,7 @@ export default function OwnerDashboardPage() {
               )}
             </div>
 
-            <div className="bg-white rounded-xl border border-line p-5">
+            <div className="bg-surface rounded-xl border border-line p-5">
               <h2 className="font-display font-semibold text-ink mb-4">Location Status</h2>
               {locationRows.length === 0 ? (
                 <div className="py-10 text-center text-sm text-ink/40">No locations yet.</div>
@@ -207,7 +211,7 @@ export default function OwnerDashboardPage() {
               </button>
             </div>
 
-            <div className="bg-white rounded-xl border border-line overflow-hidden">
+            <div className="bg-surface rounded-xl border border-line overflow-hidden">
               {data.recentBookings.length === 0 ? (
                 <div className="py-14 text-center text-sm text-ink/40">No bookings yet.</div>
               ) : (
@@ -258,7 +262,7 @@ export default function OwnerDashboardPage() {
           {data.listings.total === 0 && (
             <div className="mt-6 bg-amber/10 border border-amber/20 rounded-xl px-5 py-4 flex items-center justify-between flex-wrap gap-3">
               <p className="text-sm text-ink">You haven't added any parking locations yet.</p>
-              <Link to="/owner/locations" className="text-sm font-medium text-navy hover:underline">
+              <Link to="/owner/locations" className="text-sm font-medium text-ink hover:underline">
                 Add your first location →
               </Link>
             </div>

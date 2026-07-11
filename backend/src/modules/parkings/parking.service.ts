@@ -17,6 +17,20 @@ export async function getAmenities(): Promise<AmenityRow[]> {
   return result.rows;
 }
 
+// Real, live city list for the "Browse by City" directory + sitemap - never
+// a hardcoded list, since a city page with zero listings behind it is thin
+// content that hurts SEO rather than helping it.
+export async function getListingCities(): Promise<{ city: string; count: number }[]> {
+  const result = await pool.query<{ city: string; count: string }>(
+    `SELECT city, COUNT(*) AS count
+     FROM parking_listings
+     WHERE is_active = true AND is_approved = true AND city IS NOT NULL
+     GROUP BY city
+     ORDER BY count DESC`
+  );
+  return result.rows.map((r) => ({ city: r.city, count: parseInt(r.count, 10) }));
+}
+
 export async function createParking(
   ownerId: string,
   data: {
@@ -24,6 +38,7 @@ export async function createParking(
     title: string;
     description?: string;
     address: string;
+    city?: string;
     latitude: number;
     longitude: number;
     totalSpaces: number;
@@ -55,16 +70,16 @@ export async function createParking(
 
   const result = await pool.query<ParkingListingRow>(
     `INSERT INTO parking_listings
-       (id, owner_id, parking_type_id, title, description, address,
+       (id, owner_id, parking_type_id, title, description, address, city,
         latitude, longitude, total_spaces, available_spaces,
         price_per_month, price_per_week, price_per_day,
         has_cctv, has_security_guard, access_type,
         is_approved, is_active, approval_status, approved_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9,$10,$11,$12,$13,$14,$15,$16,$16,$17,$18)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10,$11,$12,$13,$14,$15,$16,$17,$17,$18,$19)
      RETURNING *`,
     [
       id, ownerId, data.parkingTypeId, data.title, data.description || null,
-      data.address, data.latitude, data.longitude, data.totalSpaces,
+      data.address, data.city || null, data.latitude, data.longitude, data.totalSpaces,
       data.pricePerMonth, data.pricePerWeek || null, data.pricePerDay || null,
       data.hasCctv || false, data.hasSecurityGuard || false, data.accessType || null,
       isApproved, isApproved ? "approved" : "pending", isApproved ? new Date() : null,
@@ -270,6 +285,7 @@ export async function updateParking(
     title: string;
     description: string;
     address: string;
+    city: string;
     latitude: number;
     longitude: number;
     totalSpaces: number;
@@ -291,6 +307,7 @@ export async function updateParking(
     title: "title",
     description: "description",
     address: "address",
+    city: "city",
     latitude: "latitude",
     longitude: "longitude",
     totalSpaces: "total_spaces",
@@ -335,7 +352,7 @@ export async function deleteParking(id: string, ownerId: string) {
 }
 
 export async function searchParkings(filters: SearchFilters) {
-  const { latitude, longitude, radius = 10, query, minPrice, maxPrice, page = 1, limit = 20 } = filters;
+  const { latitude, longitude, radius = 10, query, cities, minPrice, maxPrice, page = 1, limit = 20 } = filters;
   const safeLimit = Math.min(limit, 50);
   const offset = (page - 1) * safeLimit;
 
@@ -356,6 +373,11 @@ export async function searchParkings(filters: SearchFilters) {
   if (query) {
     params.push(`%${query}%`);
     where += ` AND (pl.title ILIKE $${idx} OR pl.address ILIKE $${idx})`;
+    idx++;
+  }
+  if (cities && cities.length > 0) {
+    params.push(cities.map((c) => c.toLowerCase()));
+    where += ` AND LOWER(pl.city) = ANY($${idx}::text[])`;
     idx++;
   }
   if (minPrice !== undefined) {
@@ -381,12 +403,15 @@ export async function searchParkings(filters: SearchFilters) {
   const orderBy = useGeo ? 'distance_km ASC' : 'pl.created_at DESC';
 
   const result = await pool.query(
-    `SELECT pl.id, pl.title, pl.address, pl.latitude, pl.longitude,
+    `SELECT pl.id, pl.title, pl.address, pl.city, pl.latitude, pl.longitude,
             pl.total_spaces, pl.available_spaces, pl.price_per_month,
             pl.price_per_week, pl.price_per_day, pl.rating, pl.review_count,
             pl.has_cctv, pl.has_security_guard,
             ${distanceCol}
-            pt.name AS parking_type, u.full_name AS owner_name
+            pt.name AS parking_type, u.full_name AS owner_name,
+            (SELECT pli.cloudinary_url FROM parking_listing_images pli
+             WHERE pli.parking_listing_id = pl.id
+             ORDER BY pli.display_order LIMIT 1) AS thumbnail_url
      FROM parking_listings pl
      LEFT JOIN parking_types pt ON pl.parking_type_id = pt.id
      LEFT JOIN users u ON pl.owner_id = u.id

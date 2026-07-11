@@ -100,8 +100,8 @@ export default function BookingFlow() {
     <div className="min-h-screen bg-concrete">
       <Navbar />
       <div className="max-w-2xl mx-auto px-6 py-12 animate-pulse space-y-4">
-        <div className="h-6 w-1/3 bg-white rounded" />
-        <div className="h-48 bg-white rounded-xl" />
+        <div className="h-6 w-1/3 bg-surface rounded" />
+        <div className="h-48 bg-surface rounded-xl" />
       </div>
     </div>
   )
@@ -110,7 +110,7 @@ export default function BookingFlow() {
     <div className="min-h-screen bg-concrete">
       <Navbar />
       <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <p className="text-ink/50">Listing not found. <Link to="/search" className="text-navy hover:underline">Search again</Link></p>
+        <p className="text-ink/50">Listing not found. <Link to="/search" className="text-ink hover:underline">Search again</Link></p>
       </div>
     </div>
   )
@@ -124,12 +124,12 @@ export default function BookingFlow() {
         <div className="flex items-center gap-3 mb-6">
           {step > 0 ? (
             <button onClick={() => setStep((s) => s - 1)}
-              className="p-2 rounded-lg hover:bg-white border border-line transition-colors">
+              className="p-2 rounded-lg hover:bg-surface border border-line transition-colors">
               <ChevronLeft size={18} className="text-ink" />
             </button>
           ) : (
             <Link to={`/parking/${listingId}`}
-              className="p-2 rounded-lg hover:bg-white border border-line transition-colors">
+              className="p-2 rounded-lg hover:bg-surface border border-line transition-colors">
               <ChevronLeft size={18} className="text-ink" />
             </Link>
           )}
@@ -147,9 +147,9 @@ export default function BookingFlow() {
         </div>
 
         {/* Parking summary strip */}
-        <div className="bg-white rounded-xl border border-line px-4 py-3 flex items-center gap-3 mb-6">
+        <div className="bg-surface rounded-xl border border-line px-4 py-3 flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-lg bg-navy/10 flex items-center justify-center shrink-0">
-            <CalendarDays size={18} className="text-navy" />
+            <CalendarDays size={18} className="text-ink" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-ink truncate">{parking.title}</p>
@@ -159,7 +159,7 @@ export default function BookingFlow() {
         </div>
 
         {/* Step content */}
-        <div className="bg-white rounded-xl border border-line overflow-hidden mb-4">
+        <div className="bg-surface rounded-xl border border-line overflow-hidden mb-4">
 
           {/* ── STEP 0: DATES ── */}
           {step === 0 && (
@@ -190,7 +190,7 @@ export default function BookingFlow() {
                   ))}
                   <div className="flex items-center justify-between text-sm pt-2 border-t border-line font-display font-semibold">
                     <span className="text-ink">Total</span>
-                    <span className="text-navy">{fmt(estimate.totalPrice)}</span>
+                    <span className="text-ink">{fmt(estimate.totalPrice)}</span>
                   </div>
                 </div>
               )}
@@ -217,7 +217,7 @@ export default function BookingFlow() {
                 <div className="text-center py-8">
                   <Car size={40} className="text-ink/20 mx-auto mb-3" />
                   <p className="text-sm text-ink/50 mb-4">No vehicles added yet.</p>
-                  <Link to="/user/vehicles" className="text-sm font-medium text-navy hover:underline">
+                  <Link to="/user/vehicles" className="text-sm font-medium text-ink hover:underline">
                     Add a vehicle →
                   </Link>
                 </div>
@@ -244,13 +244,13 @@ export default function BookingFlow() {
                         </span>
                       )}
                       {selectedVehicle?.id === v.id && (
-                        <CheckCircle2 size={18} className="text-navy shrink-0" />
+                        <CheckCircle2 size={18} className="text-ink shrink-0" />
                       )}
                     </button>
                   ))}
                 </div>
               )}
-              <Link to="/user/vehicles" className="block text-sm text-navy/60 hover:text-navy hover:underline text-center mt-2">
+              <Link to="/user/vehicles" className="block text-sm text-ink/60 hover:text-ink hover:underline text-center mt-2">
                 + Add another vehicle
               </Link>
             </div>
@@ -298,7 +298,7 @@ export default function BookingFlow() {
                 </div>
                 <div className="flex justify-between text-base font-display font-semibold border-t border-line pt-2">
                   <span className="text-ink">Total</span>
-                  <span className="text-navy">{fmt(estimate.totalPrice)}</span>
+                  <span className="text-ink">{fmt(estimate.totalPrice)}</span>
                 </div>
               </div>
 

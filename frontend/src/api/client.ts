@@ -11,4 +11,16 @@ client.interceptors.request.use((config) => {
   return config
 })
 
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
+      localStorage.removeItem('carparkin_token')
+      localStorage.removeItem('carparkin_user')
+      window.location.href = `/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`
+    }
+    return Promise.reject(error)
+  }
+)
+
 export default client

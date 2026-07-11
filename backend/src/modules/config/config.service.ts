@@ -12,6 +12,8 @@ export async function updatePlatformSettings(data: {
   supportPhone?: string;
   supportEmail?: string;
   supportHours?: string;
+  logoUrl?: string;
+  heroImageUrl?: string;
 }, adminId: string) {
   const sets: string[] = [];
   const params: any[] = [];
@@ -21,6 +23,8 @@ export async function updatePlatformSettings(data: {
   if (data.supportPhone !== undefined) { params.push(data.supportPhone); sets.push(`support_phone = $${params.length}`); }
   if (data.supportEmail !== undefined) { params.push(data.supportEmail); sets.push(`support_email = $${params.length}`); }
   if (data.supportHours !== undefined) { params.push(data.supportHours); sets.push(`support_hours = $${params.length}`); }
+  if (data.logoUrl !== undefined) { params.push(data.logoUrl); sets.push(`logo_url = $${params.length}`); }
+  if (data.heroImageUrl !== undefined) { params.push(data.heroImageUrl); sets.push(`hero_image_url = $${params.length}`); }
   if (sets.length === 0) return getPlatformSettings();
 
   sets.push(`updated_at = NOW()`);

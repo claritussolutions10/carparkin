@@ -150,7 +150,7 @@ export default function OwnerBookings() {
 
       {/* Stat cards */}
       <div className="grid md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <div className="flex items-center gap-2 text-ink/40">
             <Car size={14} />
             <p className="text-xs font-semibold uppercase tracking-wide">Active Bookings</p>
@@ -158,7 +158,7 @@ export default function OwnerBookings() {
           <p className="font-display text-2xl font-bold text-ink mt-2">{activeCount}</p>
           <p className="text-xs text-ink/40 mt-1">Across {distinctLocations} location{distinctLocations === 1 ? '' : 's'}</p>
         </div>
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <div className="flex items-center gap-2 text-ink/40">
             <Clock size={14} />
             <p className="text-xs font-semibold uppercase tracking-wide">Expiring Soon</p>
@@ -166,7 +166,7 @@ export default function OwnerBookings() {
           <p className="font-display text-2xl font-bold text-ink mt-2">{expiringCount}</p>
           <p className="text-xs text-amber-700 font-medium mt-1">Within next 7 days</p>
         </div>
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <div className="flex items-center gap-2 text-ink/40">
             <IndianRupee size={14} />
             <p className="text-xs font-semibold uppercase tracking-wide">Revenue ({fmtMonthLabel(new Date())})</p>
@@ -177,7 +177,7 @@ export default function OwnerBookings() {
       </div>
 
       {/* Search + filter bar */}
-      <div className="bg-white rounded-xl border border-line p-3 flex items-center gap-3 flex-wrap mb-6">
+      <div className="bg-surface rounded-xl border border-line p-3 flex items-center gap-3 flex-wrap mb-6">
         <div className="relative flex-1 min-w-[220px]">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40" />
           <input
@@ -194,15 +194,15 @@ export default function OwnerBookings() {
       {/* Table */}
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-20 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-20 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : pageItems.length === 0 ? (
-        <div className="bg-white rounded-xl border border-line py-16 text-center text-sm text-ink/40">
+        <div className="bg-surface rounded-xl border border-line py-16 text-center text-sm text-ink/40">
           No bookings found.
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-line overflow-hidden">
+          <div className="bg-surface rounded-xl border border-line overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -253,7 +253,7 @@ export default function OwnerBookings() {
                             {openMenuId === b.id && (
                               <>
                                 <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
-                                <div className="absolute right-0 top-9 z-20 bg-white rounded-lg border border-line shadow-lg py-1 w-48">
+                                <div className="absolute right-0 top-9 z-20 bg-surface rounded-lg border border-line shadow-lg py-1 w-48">
                                   <button
                                     onClick={() => { setDetailsTarget(b); setOpenMenuId(null) }}
                                     className="w-full text-left px-3 py-2 text-sm text-ink/70 hover:bg-concrete transition-colors"
@@ -318,7 +318,7 @@ export default function OwnerBookings() {
                   key={p}
                   onClick={() => setPage(p)}
                   className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
-                    page === p ? 'bg-green text-white border-green' : 'bg-white border-line text-ink/60 hover:bg-concrete hover:border-green/40'
+                    page === p ? 'bg-green text-white border-green' : 'bg-surface border-line text-ink/60 hover:bg-concrete hover:border-green/40'
                   }`}
                 >
                   {p}

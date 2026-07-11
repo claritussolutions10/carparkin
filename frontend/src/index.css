@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-ink: #15202B;
   --color-navy: #1B2A4A;
@@ -8,6 +10,7 @@
   --color-concrete: #F4F5F7;
   --color-line: #D7DBE0;
   --color-danger: #D64545;
+  --color-surface: #FFFFFF;
 
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "IBM Plex Sans", sans-serif;
@@ -18,6 +21,17 @@
   --color-admin-bg: #F4F5F7;
   --color-admin-surface: #FFFFFF;
   --color-admin-border: #D7DBE0;
+}
+
+.dark {
+  --color-ink: #E7EAF0;
+  --color-concrete: #0F1420;
+  --color-line: #2B3548;
+  --color-surface: #1B2333;
+  --color-admin-bg: #0F1420;
+  --color-admin-surface: #1B2333;
+  --color-admin-border: #2B3548;
+  color-scheme: dark;
 }
 
 body {

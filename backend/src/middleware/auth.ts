@@ -26,3 +26,13 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   }
   next();
 }
+
+export function requireRole(role: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (req.user?.role !== role) {
+      res.status(403).json({ error: `${role} access required` });
+      return;
+    }
+    next();
+  };
+}

@@ -193,7 +193,7 @@ export default function AdminUsers() {
       </div>
 
       {/* Search + filters */}
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search by name, email, or ID..." className="flex-1 min-w-[220px]" />
         <Select value={role} onChange={(e) => setRole(e.target.value)} placeholder="User Role" options={ROLE_OPTIONS} />
         <Select value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" options={STATUS_OPTIONS} />
@@ -230,7 +230,7 @@ export default function AdminUsers() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

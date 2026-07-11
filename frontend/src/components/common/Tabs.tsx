@@ -7,7 +7,7 @@ interface TabsProps {
 
 export default function Tabs({ tabs, active, onChange, className = '' }: TabsProps) {
   return (
-    <div className={`flex gap-1 bg-white border border-line rounded-xl p-1 w-fit ${className}`}>
+    <div className={`flex gap-1 bg-surface border border-line rounded-xl p-1 w-fit ${className}`}>
       {tabs.map((t) => (
         <button key={t} onClick={() => onChange(t)}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${

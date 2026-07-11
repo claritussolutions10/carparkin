@@ -108,7 +108,7 @@ export const getOwnerSubscription = () =>
 export const getOwnerSettings = () =>
   client.get<{ settings: OwnerSettings }>('/owner/settings').then((r) => r.data.settings)
 
-export const updateOwnerSettings = (data: { fullName?: string; phoneNumber?: string; requiresListingApproval?: boolean }) =>
+export const updateOwnerSettings = (data: { fullName?: string; phoneNumber?: string; profilePicture?: string; requiresListingApproval?: boolean }) =>
   client.put<{ settings: OwnerSettings }>('/owner/settings', data).then((r) => r.data.settings)
 
 export interface OwnerReview {

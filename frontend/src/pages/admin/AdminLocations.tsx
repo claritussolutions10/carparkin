@@ -204,14 +204,14 @@ export default function AdminLocations() {
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {statCards.map((c) => (
-            <div key={c.label} className="bg-white rounded-xl border border-line p-5">
+            <div key={c.label} className="bg-surface rounded-xl border border-line p-5">
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm text-ink/50">{c.label}</p>
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${c.iconClass}`}>
                   <c.icon size={16} />
                 </div>
               </div>
-              <p className="font-display text-2xl font-semibold text-navy mt-1">{c.value.toLocaleString('en-IN')}</p>
+              <p className="font-display text-2xl font-semibold text-ink mt-1">{c.value.toLocaleString('en-IN')}</p>
               <div className="mt-1"><TrendPill value={c.trend} /></div>
             </div>
           ))}
@@ -219,7 +219,7 @@ export default function AdminLocations() {
       )}
 
       {/* Search + filters */}
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <SearchInput value={search} onChange={setSearch} placeholder="Search by parking name, owner, or ID..." className="flex-1 min-w-[220px]" />
         <Select value={status} onChange={(e) => setStatus(e.target.value)} placeholder="All Statuses" options={STATUS_OPTIONS} />
         <button
@@ -262,7 +262,7 @@ export default function AdminLocations() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-line overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -333,7 +333,7 @@ export default function AdminLocations() {
                           {openMenuId === l.id && (
                             <>
                               <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
-                              <div className="absolute right-0 top-9 z-20 bg-white rounded-lg border border-line shadow-lg py-1 w-44">
+                              <div className="absolute right-0 top-9 z-20 bg-surface rounded-lg border border-line shadow-lg py-1 w-44">
                                 <button onClick={() => openEdit(l)} className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-ink/70 hover:bg-concrete transition-colors">
                                   <Pencil size={13} /> Edit
                                 </button>

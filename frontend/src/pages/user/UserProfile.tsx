@@ -18,6 +18,7 @@ import Pagination from '../../components/common/Pagination'
 import Modal from '../../components/common/Modal'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
 import NotificationBell from '../../components/common/NotificationBell'
+import { uploadFile } from '../../components/common/ImageUploader'
 import { useAuthStore } from '../../store/authStore'
 
 const VEHICLE_TYPES = ['car', 'bike', 'auto', 'suv', 'truck']
@@ -53,7 +54,7 @@ function ProfileField({ label, value, onChange, disabled, type = 'text', placeho
 }
 
 export default function UserProfile() {
-  const { user } = useAuthStore()
+  const { user, updateUser } = useAuthStore()
 
   // Personal information
   const [profile, setProfile] = useState<any>(null)
@@ -70,9 +71,11 @@ export default function UserProfile() {
   const [resendingVerification, setResendingVerification] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
 
-  // Avatar — no avatar_url field on the backend either, so this is a
-  // client-side-only preview (object URL), not an uploaded/persisted photo.
+  // Avatar — read as a base64 data URL via uploadFile(), then persisted to
+  // users.profile_picture through PUT /user/profile.
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   // Vehicles
@@ -131,10 +134,24 @@ export default function UserProfile() {
 
   const paymentsTotalPages = Math.ceil(paymentsTotal / paymentsLimit)
 
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) setAvatarPreview(URL.createObjectURL(file))
     e.target.value = ''
+    if (!file) return
+    setAvatarPreview(URL.createObjectURL(file))
+    setAvatarError('')
+    setAvatarUploading(true)
+    try {
+      const uploaded = await uploadFile(file)
+      const updated = await updateUserProfile({ profilePicture: uploaded.url })
+      setProfile(updated)
+      updateUser({ profile_picture: uploaded.url })
+    } catch {
+      setAvatarError('Could not upload photo. Please try again.')
+      setAvatarPreview(null)
+    } finally {
+      setAvatarUploading(false)
+    }
   }
 
   const handleCancel = () => {
@@ -202,8 +219,8 @@ export default function UserProfile() {
   if (loading) return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
       <div className="grid md:grid-cols-[65fr_35fr] gap-6">
-        <div className="h-96 bg-white rounded-xl border border-line animate-pulse" />
-        <div className="h-96 bg-white rounded-xl border border-line animate-pulse" />
+        <div className="h-96 bg-surface rounded-xl border border-line animate-pulse" />
+        <div className="h-96 bg-surface rounded-xl border border-line animate-pulse" />
       </div>
     </div>
   )
@@ -245,7 +262,7 @@ export default function UserProfile() {
         {/* Left column */}
         <div className="space-y-6 min-w-0">
           {/* Personal Information */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display font-semibold text-ink">Personal Information</h2>
               {!editing && (
@@ -258,15 +275,16 @@ export default function UserProfile() {
             <div className="flex items-center gap-4 mb-6">
               <div className="relative shrink-0">
                 <div className="w-16 h-16 rounded-full bg-navy text-white flex items-center justify-center font-display text-xl font-semibold overflow-hidden">
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
+                  {avatarPreview ?? profile?.profile_picture ? (
+                    <img src={avatarPreview ?? profile?.profile_picture} alt="" className="w-full h-full object-cover" />
                   ) : (
                     (user?.full_name ?? profile?.full_name ?? 'U')[0]
                   )}
                 </div>
                 <button
                   onClick={() => avatarInputRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-green border-2 border-white flex items-center justify-center text-white"
+                  disabled={avatarUploading}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-green border-2 border-white flex items-center justify-center text-white disabled:opacity-60"
                   aria-label="Change photo"
                 >
                   <Camera size={11} />
@@ -276,6 +294,8 @@ export default function UserProfile() {
               <div className="min-w-0">
                 <p className="font-display font-semibold text-ink truncate">{profile?.full_name}</p>
                 <p className="text-sm text-ink/50 truncate">{profile?.email}</p>
+                {avatarUploading && <p className="text-xs text-ink/40 mt-0.5">Uploading photo...</p>}
+                {avatarError && <p className="text-xs text-danger mt-0.5">{avatarError}</p>}
               </div>
             </div>
 
@@ -299,7 +319,7 @@ export default function UserProfile() {
           </div>
 
           {/* My Vehicles */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display font-semibold text-ink">My Vehicles</h2>
               <Button onClick={() => setShowAddVehicle(true)}>
@@ -319,7 +339,7 @@ export default function UserProfile() {
                   <div
                     key={v.id}
                     className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${
-                      v.is_primary ? 'bg-green-50 border-green/30' : 'bg-white border-line'
+                      v.is_primary ? 'bg-green-50 border-green/30' : 'bg-surface border-line'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -343,10 +363,10 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => setEditVehicle(v)} className="p-1.5 rounded-lg text-ink/40 hover:text-green hover:bg-white/60 transition-colors" aria-label="Edit vehicle">
+                      <button onClick={() => setEditVehicle(v)} className="p-1.5 rounded-lg text-ink/40 hover:text-green hover:bg-concrete transition-colors" aria-label="Edit vehicle">
                         <Pencil size={14} />
                       </button>
-                      <button onClick={() => setDeleteVehicle(v)} className="p-1.5 rounded-lg text-ink/40 hover:text-danger hover:bg-white/60 transition-colors" aria-label="Delete vehicle">
+                      <button onClick={() => setDeleteVehicle(v)} className="p-1.5 rounded-lg text-ink/40 hover:text-danger hover:bg-concrete transition-colors" aria-label="Delete vehicle">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -357,7 +377,7 @@ export default function UserProfile() {
           </div>
 
           {/* Payment history */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-5">Payment History</h2>
 
             {paymentsLoading ? (
@@ -394,7 +414,7 @@ export default function UserProfile() {
         {/* Right column */}
         <div className="space-y-6 min-w-0">
           {/* Security */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-4">Security</h2>
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -416,7 +436,7 @@ export default function UserProfile() {
           </div>
 
           {/* Preferences */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-4">Preferences</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">
@@ -471,7 +491,7 @@ export default function UserProfile() {
             ) : (
               <button
                 onClick={() => setDeleteAccountOpen(true)}
-                className="mt-4 bg-white border border-danger text-danger rounded-lg px-4 py-2 text-sm font-medium hover:bg-danger/5 transition-colors"
+                className="mt-4 bg-surface border border-danger text-danger rounded-lg px-4 py-2 text-sm font-medium hover:bg-danger/5 transition-colors"
               >
                 Delete Account
               </button>

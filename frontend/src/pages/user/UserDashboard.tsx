@@ -91,14 +91,14 @@ export default function UserDashboardPage() {
 
       {loading ? (
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="md:col-span-2 h-40 bg-white rounded-xl border border-line animate-pulse" />
-          <div className="h-40 bg-white rounded-xl border border-line animate-pulse" />
+          <div className="md:col-span-2 h-40 bg-surface rounded-xl border border-line animate-pulse" />
+          <div className="h-40 bg-surface rounded-xl border border-line animate-pulse" />
         </div>
       ) : (
         <>
           {/* Profile + Savings row */}
           <div className="grid md:grid-cols-[65fr_35fr] gap-6 mb-8">
-            <div className="bg-white rounded-xl border border-line p-6 flex items-center justify-between gap-4 flex-wrap">
+            <div className="bg-surface rounded-xl border border-line p-6 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4 min-w-0">
                 <div className="relative shrink-0">
                   <div className="w-16 h-16 rounded-full bg-navy text-white flex items-center justify-center font-display text-xl font-semibold">
@@ -159,7 +159,7 @@ export default function UserDashboardPage() {
             </div>
 
             {currentBooking ? (
-              <div className="bg-white rounded-xl border border-line overflow-hidden grid md:grid-cols-2">
+              <div className="bg-surface rounded-xl border border-line overflow-hidden grid md:grid-cols-2">
                 <div className="relative h-48 md:h-full min-h-[220px]">
                   {currentBooking.latitude != null && currentBooking.longitude != null ? (
                     <Map
@@ -227,7 +227,7 @@ export default function UserDashboardPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-line p-10 text-center">
+              <div className="bg-surface rounded-xl border border-line p-10 text-center">
                 <Car size={36} className="text-ink/20 mx-auto mb-3" />
                 <p className="font-medium text-ink">No active booking</p>
                 <p className="text-sm text-ink/50 mt-1 mb-4">Find a monthly parking spot to get started.</p>
@@ -246,7 +246,7 @@ export default function UserDashboardPage() {
             </div>
 
             {history.length === 0 ? (
-              <div className="bg-white rounded-xl border border-line py-12 text-center text-sm text-ink/40">
+              <div className="bg-surface rounded-xl border border-line py-12 text-center text-sm text-ink/40">
                 No past bookings yet.
               </div>
             ) : (
@@ -254,7 +254,7 @@ export default function UserDashboardPage() {
                 {history.map((b) => {
                   const expired = b.status === 'completed'
                   return (
-                    <div key={b.id} className="bg-white rounded-xl border border-line p-4">
+                    <div key={b.id} className="bg-surface rounded-xl border border-line p-4">
                       <div className="flex items-center justify-between">
                         <div className="w-8 h-8 rounded-lg bg-concrete flex items-center justify-center text-ink/40 font-display font-bold text-sm">
                           P

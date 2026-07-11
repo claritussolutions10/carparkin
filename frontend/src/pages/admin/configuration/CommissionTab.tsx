@@ -26,10 +26,10 @@ export default function CommissionTab() {
     } catch { /* keep value in the input on failure */ } finally { setSaving(false) }
   }
 
-  if (loading || !config) return <div className="h-40 bg-white rounded-xl border border-line animate-pulse" />
+  if (loading || !config) return <div className="h-40 bg-surface rounded-xl border border-line animate-pulse" />
 
   return (
-    <div className="bg-white rounded-xl border border-line p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <h2 className="font-display font-semibold text-ink">Commission & Payouts</h2>
       <p className="text-xs text-ink/40 mt-1 mb-5">
         Single rate applied to every booking platform-wide — changes take effect on the next booking calculated, affecting Owner earnings and payouts immediately.

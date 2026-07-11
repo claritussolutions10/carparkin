@@ -19,10 +19,10 @@ export default function ListingPolicyTab() {
     } catch { setRequireApproval(!checked) }
   }
 
-  if (loading || !config) return <div className="h-32 bg-white rounded-xl border border-line animate-pulse" />
+  if (loading || !config) return <div className="h-32 bg-surface rounded-xl border border-line animate-pulse" />
 
   return (
-    <div className="bg-white rounded-xl border border-line p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <h2 className="font-display font-semibold text-ink">Listing Approval Policy</h2>
       <p className="text-xs text-ink/40 mt-1 mb-5">
         Platform-wide default for new listings — an individual owner's own preference (set in their Profile) always takes precedence over this default.

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { Lock, CreditCard, AlertTriangle } from 'lucide-react'
-import { processTestPayment, confirmBooking } from '../../api/bookings.api'
+import { Lock } from 'lucide-react'
+import { createPaymentOrder, verifyPayment } from '../../api/bookings.api'
+import { loadRazorpayCheckout } from '../../lib/razorpay'
+import { useAuthStore } from '../../store/authStore'
 import Button from '../../components/common/Button'
 import Navbar from '../../components/layout/Navbar'
 
@@ -10,6 +12,7 @@ function fmt(n: number) { return `₹${Number(n).toLocaleString('en-IN')}` }
 export default function PaymentPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const bookingId = params.get('bookingId') ?? ''
   const amount = Number(params.get('amount') ?? 0)
 
@@ -24,13 +27,40 @@ export default function PaymentPage() {
     setError('')
     setProcessing(true)
     try {
-      const result = await processTestPayment(bookingId, amount)
-      if (!result.success) { setError('Payment failed. Please try again.'); return }
-      await confirmBooking(bookingId, result.paymentId)
-      navigate(`/booking/confirmation?bookingId=${bookingId}`)
+      const [order] = await Promise.all([createPaymentOrder(bookingId), loadRazorpayCheckout()])
+
+      const razorpay = new window.Razorpay!({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+        name: 'Carparkin.in',
+        description: 'Monthly parking booking',
+        prefill: {
+          name: user?.full_name,
+          email: user?.email,
+          contact: user?.phone_number,
+        },
+        theme: { color: '#22c55e' },
+        handler: async (response) => {
+          try {
+            await verifyPayment(bookingId, response)
+            navigate(`/booking/confirmation?bookingId=${bookingId}`)
+          } catch (err: any) {
+            setError(err?.response?.data?.error ?? 'Payment verification failed. Please contact support before trying again.')
+          } finally {
+            setProcessing(false)
+          }
+        },
+        modal: {
+          ondismiss: () => setProcessing(false),
+        },
+      })
+      razorpay.open()
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Payment failed. Please try again.')
-    } finally { setProcessing(false) }
+      setError(err?.response?.data?.error ?? 'Could not start payment. Please try again.')
+      setProcessing(false)
+    }
   }
 
   return (
@@ -38,14 +68,14 @@ export default function PaymentPage() {
       <Navbar />
 
       <div className="max-w-lg mx-auto px-4 py-10">
-        <Link to="#" onClick={() => navigate(-1)} className="text-sm text-ink/50 hover:text-navy inline-flex items-center gap-1 mb-6">
+        <Link to="#" onClick={() => navigate(-1)} className="text-sm text-ink/50 hover:text-ink inline-flex items-center gap-1 mb-6">
           ← Back
         </Link>
 
         <h1 className="font-display text-2xl font-semibold text-ink mb-6">Complete Payment</h1>
 
         {/* Order summary */}
-        <div className="bg-white rounded-xl border border-line p-5 mb-4">
+        <div className="bg-surface rounded-xl border border-line p-5 mb-4">
           <h2 className="font-display font-semibold text-ink mb-4">Order Summary</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-ink/60">
@@ -59,32 +89,15 @@ export default function PaymentPage() {
           </div>
           <div className="border-t border-line mt-4 pt-4 flex justify-between font-display font-semibold text-lg">
             <span className="text-ink">Total</span>
-            <span className="text-navy">{fmt(amount)}</span>
-          </div>
-        </div>
-
-        {/* Test payment notice */}
-        <div className="bg-amber/10 border border-amber/30 rounded-xl px-4 py-3 flex items-start gap-3 mb-4">
-          <AlertTriangle size={16} className="text-amber shrink-0 mt-0.5" />
-          <div className="text-sm text-ink/70">
-            <p className="font-medium text-ink">Test Mode</p>
-            <p>No real payment is charged. Click "Pay Now" to simulate a successful payment.</p>
+            <span className="text-ink">{fmt(amount)}</span>
           </div>
         </div>
 
         {/* Payment CTA */}
-        <div className="bg-white rounded-xl border border-line p-5 mb-4 space-y-4">
+        <div className="bg-surface rounded-xl border border-line p-5 mb-4 space-y-4">
           <div className="flex items-center gap-2 text-sm text-ink/50">
             <Lock size={14} className="text-green-600" />
-            <span>Secure payment · SSL encrypted</span>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 bg-concrete rounded-lg border-2 border-navy">
-            <CreditCard size={20} className="text-navy" />
-            <div>
-              <p className="text-sm font-medium text-ink">Test Payment Gateway</p>
-              <p className="text-xs text-ink/50">Simulates a real payment for demo purposes</p>
-            </div>
+            <span>Secure payment via Razorpay · SSL encrypted</span>
           </div>
         </div>
 

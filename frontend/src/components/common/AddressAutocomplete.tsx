@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react'
-import { useMapsLibrary } from '@vis.gl/react-google-maps'
+import { useRef, useEffect } from 'react'
+import { usePlacesAutocomplete } from '../../hooks/usePlacesAutocomplete'
 
 interface AddressResult {
   address: string
@@ -16,19 +16,10 @@ interface AddressAutocompleteProps {
 
 export default function AddressAutocomplete({ value, onChange, onSelect }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const places = useMapsLibrary('places')
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null)
 
-  useEffect(() => {
-    if (!places || !inputRef.current) return
-
-    const ac = new places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: 'in' },
-      fields: ['formatted_address', 'geometry', 'address_components'],
-    })
-
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace()
+  usePlacesAutocomplete(
+    inputRef,
+    (place) => {
       if (!place.geometry?.location) return
 
       const city = place.address_components?.find(
@@ -41,21 +32,16 @@ export default function AddressAutocomplete({ value, onChange, onSelect }: Addre
         latitude: place.geometry.location.lat(),
         longitude: place.geometry.location.lng(),
       })
-    })
-
-    setAutocomplete(ac)
-
-    return () => {
-      google.maps.event.clearInstanceListeners(ac)
-    }
-  }, [places])
+    },
+    { componentRestrictions: { country: 'in' }, fields: ['formatted_address', 'geometry', 'address_components'] }
+  )
 
   // Sync value prop changes to the input (for edit mode pre-fill)
   useEffect(() => {
-    if (inputRef.current && inputRef.current.value !== value && !autocomplete) {
+    if (inputRef.current && inputRef.current.value !== value) {
       inputRef.current.value = value
     }
-  }, [value, autocomplete])
+  }, [value])
 
   return (
     <div className="space-y-1.5">

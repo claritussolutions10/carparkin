@@ -29,10 +29,10 @@ export default function SupportTab() {
     } catch { /* keep values in the form on failure */ } finally { setSaving(false) }
   }
 
-  if (loading) return <div className="h-56 bg-white rounded-xl border border-line animate-pulse" />
+  if (loading) return <div className="h-56 bg-surface rounded-xl border border-line animate-pulse" />
 
   return (
-    <div className="bg-white rounded-xl border border-line p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <h2 className="font-display font-semibold text-ink">Support & Contact</h2>
       <p className="text-xs text-ink/40 mt-1 mb-5">
         Shown on the User Portal's Help & Support page — one place to update it everywhere.

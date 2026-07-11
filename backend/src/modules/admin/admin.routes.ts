@@ -5,6 +5,7 @@ const router = Router();
 
 router.get("/dashboard", adminController.getDashboard);
 router.get("/dashboard/booking-volume", adminController.getBookingVolume);
+router.put("/profile", adminController.updateProfile);
 router.get("/users", adminController.getUsers);
 router.patch("/users/:id/status", adminController.updateUserStatus);
 router.patch("/users/:id", adminController.updateUser);

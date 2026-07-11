@@ -193,38 +193,11 @@ router.post("/", authenticate, bookingsController.createBooking);
  */
 router.get("/:id", bookingsController.getBookingDetails);
 
-/**
- * @swagger
- * /api/bookings/{id}/confirm:
- *   post:
- *     summary: Confirm booking after payment
- *     description: Changes status to confirmed, records payment ID, creates owner earnings entry
- *     tags: [Bookings]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               razorpayPaymentId: { type: string, example: "pay_PjRQkQIbbV6ABCD" }
- *     responses:
- *       200:
- *         description: Booking confirmed, earnings recorded
- *       400:
- *         description: Booking not in pending status
- *       403:
- *         description: Not your booking
- *       404:
- *         description: Booking not found
- */
-router.post("/:id/confirm", authenticate, bookingsController.confirmBooking);
+// No public /:id/confirm route - bookingsService.confirmBooking() is only
+// ever called after a verified Razorpay payment (POST /api/payments/verify,
+// or the payment.captured webhook). A route here would let any authenticated
+// user confirm their own pending booking by POSTing an arbitrary payment ID
+// with nothing to check it against.
 
 /**
  * @swagger

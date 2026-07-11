@@ -76,31 +76,31 @@ export default function AdminSupport() {
 
       {stats && (
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Open Tickets</p>
               <div className="w-9 h-9 rounded-lg bg-amber/20 text-amber-700 flex items-center justify-center shrink-0"><Inbox size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.openCount}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.openCount}</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Urgent</p>
               <div className="w-9 h-9 rounded-lg bg-danger/10 text-danger flex items-center justify-center shrink-0"><AlertTriangle size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.urgentCount}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.urgentCount}</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-ink/50">Resolved Today</p>
               <div className="w-9 h-9 rounded-lg bg-green/10 text-green flex items-center justify-center shrink-0"><CheckCircle2 size={16} /></div>
             </div>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.resolvedToday}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.resolvedToday}</p>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
+      <div className="bg-surface rounded-xl border border-line p-4 mb-6 flex flex-wrap items-center gap-3">
         <Select value={status} onChange={(e) => setStatus(e.target.value)} placeholder="All Statuses" options={STATUS_OPTIONS} />
         <label className="flex items-center gap-2 text-sm text-ink/70 cursor-pointer">
           <input type="checkbox" checked={urgentOnly} onChange={(e) => setUrgentOnly(e.target.checked)} className="h-4 w-4 rounded border-line text-green focus:ring-green/30" />
@@ -111,17 +111,17 @@ export default function AdminSupport() {
 
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : tickets.length === 0 ? (
-        <div className="bg-white rounded-xl border border-line py-16 text-center">
+        <div className="bg-surface rounded-xl border border-line py-16 text-center">
           <MessageSquare size={32} className="text-ink/20 mx-auto mb-3" />
           <p className="text-ink/40 text-sm">No tickets match this filter.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {tickets.map((t) => (
-            <div key={t.id} className="bg-white rounded-xl border border-line p-5">
+            <div key={t.id} className="bg-surface rounded-xl border border-line p-5">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">

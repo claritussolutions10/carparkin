@@ -72,36 +72,36 @@ export default function OwnerReviews() {
 
       {stats && (
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <p className="text-sm text-ink/50">Average Rating</p>
-            <p className="font-display text-2xl font-semibold text-navy mt-1 flex items-center gap-1.5">
+            <p className="font-display text-2xl font-semibold text-ink mt-1 flex items-center gap-1.5">
               {stats.averageRating.toFixed(1)} <Star size={16} className="fill-amber-400 text-amber-400" />
             </p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <p className="text-sm text-ink/50">Total Reviews</p>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.total}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.total}</p>
           </div>
-          <div className="bg-white rounded-xl border border-line p-5">
+          <div className="bg-surface rounded-xl border border-line p-5">
             <p className="text-sm text-ink/50">Awaiting Reply</p>
-            <p className="font-display text-2xl font-semibold text-navy mt-1">{stats.unreplied}</p>
+            <p className="font-display text-2xl font-semibold text-ink mt-1">{stats.unreplied}</p>
           </div>
         </div>
       )}
 
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-white rounded-xl border border-line animate-pulse" />)}
+          {Array.from({ length: 3 }, (_, i) => <div key={i} className="h-28 bg-surface rounded-xl border border-line animate-pulse" />)}
         </div>
       ) : reviews.length === 0 ? (
-        <div className="bg-white rounded-xl border border-line py-16 text-center">
+        <div className="bg-surface rounded-xl border border-line py-16 text-center">
           <MessageSquare size={32} className="text-ink/20 mx-auto mb-3" />
           <p className="text-ink/40 text-sm">No reviews yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
-            <div key={r.id} className="bg-white rounded-xl border border-line p-5">
+            <div key={r.id} className="bg-surface rounded-xl border border-line p-5">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -114,7 +114,7 @@ export default function OwnerReviews() {
                   </div>
                   <p className="text-sm font-medium text-ink">
                     {r.reviewer_name} <span className="text-ink/40 font-normal">on</span>{' '}
-                    <Link to={`/parking/${r.listing_id}`} className="text-navy hover:text-green transition-colors">{r.listing_title}</Link>
+                    <Link to={`/parking/${r.listing_id}`} className="text-ink hover:text-green transition-colors">{r.listing_title}</Link>
                   </p>
                   {r.review_text && <p className="text-sm text-ink/70 mt-1.5">{r.review_text}</p>}
                   <p className="text-xs text-ink/40 mt-1.5">{fmtDate(r.created_at)}</p>

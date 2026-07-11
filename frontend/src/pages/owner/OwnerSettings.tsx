@@ -67,7 +67,7 @@ function ProfileField({ label, value, onChange, disabled, type = 'text' }: Profi
 }
 
 export default function OwnerSettingsPage() {
-  const { user } = useAuthStore()
+  const { user, updateUser } = useAuthStore()
 
   // Personal information
   const [settings, setSettings] = useState<OwnerSettings | null>(null)
@@ -78,9 +78,11 @@ export default function OwnerSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  // Avatar — no avatar_url field on the backend either, so this is a
-  // client-side-only preview (object URL), not an uploaded/persisted photo.
+  // Avatar — read as a base64 data URL via uploadFile(), then persisted to
+  // users.profile_picture through PUT /owner/settings.
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   // Listing approval preference — the one real, persisted owner-specific setting.
@@ -148,10 +150,24 @@ export default function OwnerSettingsPage() {
 
   const payoutsTotalPages = Math.ceil(payoutsTotal / payoutsLimit)
 
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) setAvatarPreview(URL.createObjectURL(file))
     e.target.value = ''
+    if (!file) return
+    setAvatarPreview(URL.createObjectURL(file))
+    setAvatarError('')
+    setAvatarUploading(true)
+    try {
+      const uploaded = await uploadFile(file)
+      const updated = await updateOwnerSettings({ profilePicture: uploaded.url })
+      setSettings(updated)
+      updateUser({ profile_picture: uploaded.url })
+    } catch {
+      setAvatarError('Could not upload photo. Please try again.')
+      setAvatarPreview(null)
+    } finally {
+      setAvatarUploading(false)
+    }
   }
 
   const handleCancel = () => {
@@ -247,8 +263,8 @@ export default function OwnerSettingsPage() {
   if (loading) return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto">
       <div className="grid md:grid-cols-[65fr_35fr] gap-6">
-        <div className="h-96 bg-white rounded-xl border border-line animate-pulse" />
-        <div className="h-96 bg-white rounded-xl border border-line animate-pulse" />
+        <div className="h-96 bg-surface rounded-xl border border-line animate-pulse" />
+        <div className="h-96 bg-surface rounded-xl border border-line animate-pulse" />
       </div>
     </div>
   )
@@ -290,7 +306,7 @@ export default function OwnerSettingsPage() {
         {/* Left column */}
         <div className="space-y-6 min-w-0">
           {/* Personal Information */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display font-semibold text-ink">Personal Information</h2>
               {!editing && (
@@ -303,15 +319,16 @@ export default function OwnerSettingsPage() {
             <div className="flex items-center gap-4 mb-6">
               <div className="relative shrink-0">
                 <div className="w-16 h-16 rounded-full bg-navy text-white flex items-center justify-center font-display text-xl font-semibold overflow-hidden">
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
+                  {avatarPreview ?? settings?.profile_picture ? (
+                    <img src={avatarPreview ?? settings?.profile_picture ?? undefined} alt="" className="w-full h-full object-cover" />
                   ) : (
                     (user?.full_name ?? settings?.full_name ?? 'O')[0]
                   )}
                 </div>
                 <button
                   onClick={() => avatarInputRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-green border-2 border-white flex items-center justify-center text-white"
+                  disabled={avatarUploading}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-green border-2 border-white flex items-center justify-center text-white disabled:opacity-60"
                   aria-label="Change photo"
                 >
                   <Camera size={11} />
@@ -321,6 +338,8 @@ export default function OwnerSettingsPage() {
               <div className="min-w-0">
                 <p className="font-display font-semibold text-ink truncate">{settings?.full_name}</p>
                 <p className="text-sm text-ink/50 truncate">{settings?.email}</p>
+                {avatarUploading && <p className="text-xs text-ink/40 mt-0.5">Uploading photo...</p>}
+                {avatarError && <p className="text-xs text-danger mt-0.5">{avatarError}</p>}
               </div>
             </div>
 
@@ -343,7 +362,7 @@ export default function OwnerSettingsPage() {
           </div>
 
           {/* Business Verification */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-5">Business Verification</h2>
             <div className="space-y-3">
               <div className="rounded-lg border border-line px-4 py-3">
@@ -420,7 +439,7 @@ export default function OwnerSettingsPage() {
           </div>
 
           {/* Payout history */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-5">Payout History</h2>
 
             {payoutsLoading ? (
@@ -457,7 +476,7 @@ export default function OwnerSettingsPage() {
         {/* Right column */}
         <div className="space-y-6 min-w-0">
           {/* Subscription summary */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <div className="flex items-center gap-2 mb-4">
               <Crown size={16} className="text-green" />
               <h2 className="font-display font-semibold text-ink">Subscription</h2>
@@ -481,7 +500,7 @@ export default function OwnerSettingsPage() {
           </div>
 
           {/* Security */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-4">Security</h2>
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -503,7 +522,7 @@ export default function OwnerSettingsPage() {
           </div>
 
           {/* Preferences */}
-          <div className="bg-white rounded-xl border border-line p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <h2 className="font-display font-semibold text-ink mb-4">Preferences</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">

@@ -10,6 +10,8 @@ export async function getPublicConfig(_req: Request, res: Response) {
         supportPhone: s.support_phone,
         supportEmail: s.support_email,
         supportHours: s.support_hours,
+        logoUrl: s.logo_url,
+        heroImageUrl: s.hero_image_url,
       },
     });
   } catch (err: any) {
@@ -27,6 +29,8 @@ export async function getAdminConfig(_req: Request, res: Response) {
         supportPhone: s.support_phone,
         supportEmail: s.support_email,
         supportHours: s.support_hours,
+        logoUrl: s.logo_url,
+        heroImageUrl: s.hero_image_url,
         updatedAt: s.updated_at,
       },
     });
@@ -37,9 +41,9 @@ export async function getAdminConfig(_req: Request, res: Response) {
 
 export async function updateAdminConfig(req: Request, res: Response) {
   try {
-    const { commissionRate, requireListingApproval, supportPhone, supportEmail, supportHours } = req.body;
+    const { commissionRate, requireListingApproval, supportPhone, supportEmail, supportHours, logoUrl, heroImageUrl } = req.body;
     const s = await configService.updatePlatformSettings({
-      commissionRate, requireListingApproval, supportPhone, supportEmail, supportHours,
+      commissionRate, requireListingApproval, supportPhone, supportEmail, supportHours, logoUrl, heroImageUrl,
     }, req.user!.userId);
     res.json({
       config: {
@@ -48,6 +52,8 @@ export async function updateAdminConfig(req: Request, res: Response) {
         supportPhone: s.support_phone,
         supportEmail: s.support_email,
         supportHours: s.support_hours,
+        logoUrl: s.logo_url,
+        heroImageUrl: s.hero_image_url,
         updatedAt: s.updated_at,
       },
     });

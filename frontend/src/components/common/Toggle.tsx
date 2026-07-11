@@ -17,7 +17,7 @@ export default function Toggle({ checked, onChange, disabled }: ToggleProps) {
       }`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
+        className={`inline-block h-4 w-4 transform rounded-full bg-surface shadow transition-transform duration-200 ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />

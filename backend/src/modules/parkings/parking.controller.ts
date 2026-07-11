@@ -3,7 +3,7 @@ import * as parkingService from "./parking.service";
 
 export async function create(req: Request, res: Response) {
   const {
-    parking_type_id, title, description, address,
+    parking_type_id, title, description, address, city,
     latitude, longitude, total_spaces, price_per_month,
     price_per_week, price_per_day, has_cctv, has_security_guard,
     access_type, amenity_ids, image_urls,
@@ -17,7 +17,7 @@ export async function create(req: Request, res: Response) {
   try {
     const parking = await parkingService.createParking(req.user!.userId, {
       parkingTypeId: parking_type_id,
-      title, description, address,
+      title, description, address, city,
       latitude: Number(latitude),
       longitude: Number(longitude),
       totalSpaces: Number(total_spaces),
@@ -117,14 +117,14 @@ export async function getOwnerParking(req: Request, res: Response) {
 
 export async function update(req: Request, res: Response) {
   const {
-    title, description, address, latitude, longitude,
+    title, description, address, city, latitude, longitude,
     total_spaces, price_per_month, price_per_week, price_per_day,
     has_cctv, has_security_guard, access_type, is_active,
   } = req.body;
 
   try {
     const parking = await parkingService.updateParking(req.params.id as string, req.user!.userId, {
-      title, description, address,
+      title, description, address, city,
       latitude: latitude !== undefined ? Number(latitude) : undefined,
       longitude: longitude !== undefined ? Number(longitude) : undefined,
       totalSpaces: total_spaces !== undefined ? Number(total_spaces) : undefined,
@@ -161,13 +161,23 @@ export async function search(req: Request, res: Response) {
       latitude: lat,
       longitude: lng,
       radius: qs('radius') ? Number(qs('radius')) : undefined,
-      query: qs('q') || qs('city') || undefined,
+      query: qs('q') || undefined,
+      cities: qs('cities') ? qs('cities')!.split(',').map((c) => c.trim()).filter(Boolean) : undefined,
       minPrice: qs('minPrice') ? Number(qs('minPrice')) : undefined,
       maxPrice: qs('maxPrice') ? Number(qs('maxPrice')) : undefined,
       page: qs('page') ? Number(qs('page')) : undefined,
       limit: qs('limit') ? Number(qs('limit')) : undefined,
     });
     res.json(result);
+  } catch (err: any) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+}
+
+export async function listCities(_req: Request, res: Response) {
+  try {
+    const cities = await parkingService.getListingCities();
+    res.json({ cities });
   } catch (err: any) {
     res.status(err.status || 500).json({ error: err.message });
   }

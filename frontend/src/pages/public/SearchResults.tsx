@@ -12,6 +12,7 @@ import Modal from '../../components/common/Modal'
 import EmptyState from '../../components/common/EmptyState'
 import ParkingFilterPanel from '../../components/common/ParkingFilterPanel'
 import { ParkingCardSkeleton } from '../../components/common/ParkingCard'
+import FavoriteButton from '../../components/common/FavoriteButton'
 import { searchParkings, type Parking } from '../../api/parkings.api'
 import { AMENITY_FILTERS, SORT_OPTIONS, amenityTags, availabilityBadge } from '../../lib/parkingFilters'
 
@@ -27,7 +28,12 @@ export default function SearchResults() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [mapOpen, setMapOpen] = useState(false)
 
-  const [location, setLocation] = useState(searchParams.get('city') || '')
+  const [location, setLocation] = useState(searchParams.get('location') || searchParams.get('q') || '')
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    searchParams.get('lat') && searchParams.get('lng')
+      ? { lat: Number(searchParams.get('lat')), lng: Number(searchParams.get('lng')) }
+      : null
+  )
   const [minPrice, setMinPrice] = useState(Number(searchParams.get('minPrice')) || 800)
   const [maxPrice, setMaxPrice] = useState(Number(searchParams.get('maxPrice')) || 4500)
   const [vehicleTypes, setVehicleTypes] = useState<Set<string>>(new Set())
@@ -40,8 +46,12 @@ export default function SearchResults() {
   const fetchResults = useCallback(async () => {
     setLoading(true)
     try {
+      const lat = searchParams.get('lat')
+      const lng = searchParams.get('lng')
       const result = await searchParkings({
-        city: searchParams.get('city') || undefined,
+        lat: lat ? Number(lat) : undefined,
+        lng: lng ? Number(lng) : undefined,
+        q: !lat ? searchParams.get('q') || undefined : undefined,
         minPrice: Number(searchParams.get('minPrice')) || undefined,
         maxPrice: Number(searchParams.get('maxPrice')) || undefined,
         page,
@@ -61,7 +71,13 @@ export default function SearchResults() {
 
   const applyFilters = () => {
     const p = new URLSearchParams()
-    if (location) p.set('city', location)
+    if (coords) {
+      p.set('lat', String(coords.lat))
+      p.set('lng', String(coords.lng))
+      p.set('location', location)
+    } else if (location) {
+      p.set('q', location)
+    }
     if (startDate) p.set('startDate', startDate)
     p.set('minPrice', String(minPrice))
     p.set('maxPrice', String(maxPrice))
@@ -71,6 +87,7 @@ export default function SearchResults() {
 
   const resetFilters = () => {
     setLocation('')
+    setCoords(null)
     setMinPrice(800)
     setMaxPrice(4500)
     setVehicleTypes(new Set())
@@ -111,12 +128,13 @@ export default function SearchResults() {
     : DEFAULT_CENTER
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
-  const locationLabel = searchParams.get('city') || 'your area'
+  const locationLabel = searchParams.get('location') || searchParams.get('q') || 'your area'
 
   const filterPanel = (
     <ParkingFilterPanel
       location={location}
-      onLocationChange={setLocation}
+      onLocationChange={(v) => { setLocation(v); setCoords(null) }}
+      onLocationSelect={setCoords}
       minPrice={minPrice}
       maxPrice={maxPrice}
       onPriceChange={(mn, mx) => { setMinPrice(mn); setMaxPrice(mx) }}
@@ -153,13 +171,13 @@ export default function SearchResults() {
                 onClick={() => setMapOpen(true)}
                 className="absolute inset-0 flex items-center justify-center bg-black/10 hover:bg-black/20 transition-colors"
               >
-                <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-medium text-ink shadow-md">
+                <span className="inline-flex items-center gap-2 bg-surface rounded-full px-4 py-2 text-sm font-medium text-ink shadow-md">
                   <MapIcon size={15} /> Show Map View
                 </span>
               </button>
             </div>
 
-            <div className="bg-white rounded-xl border border-line p-5 sticky top-6">
+            <div className="bg-surface rounded-xl border border-line p-5 sticky top-6">
               {filterPanel}
             </div>
           </aside>
@@ -179,7 +197,7 @@ export default function SearchResults() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setMobileFiltersOpen(true)}
-                  className="lg:hidden inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-sm font-medium text-ink hover:bg-white transition-colors"
+                  className="lg:hidden inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-sm font-medium text-ink hover:bg-surface transition-colors"
                 >
                   <SlidersHorizontal size={15} /> Filters
                 </button>
@@ -214,17 +232,22 @@ export default function SearchResults() {
                   {visibleListings.map((p) => {
                     const availability = availabilityBadge(p)
                     return (
-                      <div key={p.id} className="bg-white rounded-xl border border-line overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                      <div key={p.id} className="bg-surface rounded-xl border border-line overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                         <div className="relative aspect-[4/3] bg-gradient-to-br from-navy to-navy-light overflow-hidden">
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="font-display font-bold text-white/25 text-5xl">P</span>
-                          </div>
-                          <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-ink/60">
+                          {p.thumbnail_url ? (
+                            <img src={p.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="font-display font-bold text-white/25 text-5xl">P</span>
+                            </div>
+                          )}
+                          <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-600">
                             <ShieldCheck size={12} /> Verified
                           </span>
+                          <FavoriteButton listingId={p.id} className="absolute top-3 right-3" />
                           <span
-                            className={`absolute top-3 right-3 rounded-md px-2 py-1 text-xs font-semibold ${
-                              availability.tone === 'danger' ? 'bg-red-100 text-danger' : 'bg-white/90 text-ink/60'
+                            className={`absolute top-12 right-3 rounded-md px-2 py-1 text-xs font-semibold ${
+                              availability.tone === 'danger' ? 'bg-red-100 text-danger' : 'bg-white/90 text-slate-600'
                             }`}
                           >
                             {availability.label}
@@ -274,7 +297,7 @@ export default function SearchResults() {
                     <button
                       onClick={() => goToPage(Math.max(1, page - 1))}
                       disabled={page === 1}
-                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-line text-ink/60 hover:bg-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-line text-ink/60 hover:bg-surface disabled:opacity-40 disabled:pointer-events-none transition-colors"
                     >
                       <ChevronLeft size={16} />
                     </button>
@@ -287,7 +310,7 @@ export default function SearchResults() {
                           <button
                             onClick={() => goToPage(p)}
                             className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${
-                              page === p ? 'bg-green text-white border-green' : 'bg-white border-line text-ink/60 hover:bg-concrete hover:border-green/40'
+                              page === p ? 'bg-green text-white border-green' : 'bg-surface border-line text-ink/60 hover:bg-concrete hover:border-green/40'
                             }`}
                           >
                             {p}
@@ -298,7 +321,7 @@ export default function SearchResults() {
                     <button
                       onClick={() => goToPage(Math.min(totalPages, page + 1))}
                       disabled={page === totalPages}
-                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-line text-ink/60 hover:bg-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-line text-ink/60 hover:bg-surface disabled:opacity-40 disabled:pointer-events-none transition-colors"
                     >
                       <ChevronRight size={16} />
                     </button>

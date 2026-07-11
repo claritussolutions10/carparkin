@@ -151,11 +151,12 @@ export async function writeReview(req: Request, res: Response) {
 }
 
 export async function updateProfile(req: Request, res: Response) {
-  const { fullName, full_name, phoneNumber, phone_number } = req.body;
+  const { fullName, full_name, phoneNumber, phone_number, profilePicture, profile_picture } = req.body;
   try {
     const profile = await userService.updateProfile(req.user!.userId, {
       fullName: fullName ?? full_name,
       phoneNumber: phoneNumber ?? phone_number,
+      profilePicture: profilePicture ?? profile_picture,
     });
     res.json({ profile });
   } catch (err: any) {

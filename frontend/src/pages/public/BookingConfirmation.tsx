@@ -34,8 +34,8 @@ export default function BookingConfirmation() {
     <div className="min-h-screen bg-concrete">
       <Navbar />
       <div className="max-w-xl mx-auto px-4 py-16 animate-pulse space-y-4">
-        <div className="h-32 bg-white rounded-xl" />
-        <div className="h-48 bg-white rounded-xl" />
+        <div className="h-32 bg-surface rounded-xl" />
+        <div className="h-48 bg-surface rounded-xl" />
       </div>
     </div>
   )
@@ -56,7 +56,7 @@ export default function BookingConfirmation() {
       <div className="max-w-xl mx-auto px-4 py-8 space-y-4">
 
         {/* Booking ID */}
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <p className="text-xs text-ink/40 uppercase tracking-wide mb-1">Booking Reference</p>
           <div className="flex items-center gap-2">
             <p className="font-mono text-sm text-ink break-all flex-1">{bookingId}</p>
@@ -68,12 +68,12 @@ export default function BookingConfirmation() {
         </div>
 
         {/* Booking details */}
-        <div className="bg-white rounded-xl border border-line p-5 space-y-4">
+        <div className="bg-surface rounded-xl border border-line p-5 space-y-4">
           <h2 className="font-display font-semibold text-ink">Booking Details</h2>
 
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-navy/10 flex items-center justify-center shrink-0 mt-0.5">
-              <MapPin size={14} className="text-navy" />
+              <MapPin size={14} className="text-ink" />
             </div>
             <div>
               <p className="text-xs text-ink/40">Parking</p>
@@ -84,7 +84,7 @@ export default function BookingConfirmation() {
 
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-navy/10 flex items-center justify-center shrink-0 mt-0.5">
-              <Calendar size={14} className="text-navy" />
+              <Calendar size={14} className="text-ink" />
             </div>
             <div>
               <p className="text-xs text-ink/40">Dates</p>
@@ -98,7 +98,7 @@ export default function BookingConfirmation() {
           {booking.make && (
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-navy/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Car size={14} className="text-navy" />
+                <Car size={14} className="text-ink" />
               </div>
               <div>
                 <p className="text-xs text-ink/40">Vehicle</p>
@@ -110,7 +110,7 @@ export default function BookingConfirmation() {
 
           <div className="border-t border-line pt-4 flex justify-between items-center">
             <span className="text-sm text-ink/50">Total Paid</span>
-            <span className="font-display font-semibold text-lg text-navy">{fmt(booking.total_price)}</span>
+            <span className="font-display font-semibold text-lg text-ink">{fmt(booking.total_price)}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export default function BookingConfirmation() {
         </div>
 
         {/* What's next */}
-        <div className="bg-white rounded-xl border border-line p-5">
+        <div className="bg-surface rounded-xl border border-line p-5">
           <h2 className="font-display font-semibold text-ink mb-4">What happens next?</h2>
           <ol className="space-y-3">
             {[
@@ -131,7 +131,7 @@ export default function BookingConfirmation() {
               'Manage your booking anytime from your dashboard.',
             ].map((s, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-ink/70">
-                <span className="w-5 h-5 rounded-full bg-navy/10 text-navy text-xs font-medium flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-navy/10 text-ink text-xs font-medium flex items-center justify-center shrink-0 mt-0.5">
                   {i + 1}
                 </span>
                 {s}

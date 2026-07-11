@@ -10,37 +10,26 @@ interface ImageUploaderProps {
   onChange: (images: UploadedImage[]) => void
 }
 
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+const MAX_FILE_BYTES = 3 * 1024 * 1024
 
-export function uploadFile(file: File, onProgress?: (pct: number) => void): Promise<UploadedImage> {
-  if (!CLOUD_NAME || !UPLOAD_PRESET) {
-    return Promise.reject(new Error('Cloudinary not configured — add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env'))
+function fileToDataUrl(file: File, onProgress?: (pct: number) => void): Promise<string> {
+  if (file.size > MAX_FILE_BYTES) {
+    return Promise.reject(new Error('Image must be smaller than 3MB'))
   }
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', UPLOAD_PRESET)
-
-  return new Promise<UploadedImage>((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`)
-
-    xhr.upload.onprogress = (e) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onprogress = (e) => {
       if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100))
     }
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        const data = JSON.parse(xhr.responseText)
-        resolve({ url: data.secure_url, publicId: data.public_id })
-      } else {
-        reject(new Error('Upload failed'))
-      }
-    }
-
-    xhr.onerror = () => reject(new Error('Upload failed'))
-    xhr.send(formData)
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error('Could not read file'))
+    reader.readAsDataURL(file)
   })
+}
+
+export async function uploadFile(file: File, onProgress?: (pct: number) => void): Promise<UploadedImage> {
+  const url = await fileToDataUrl(file, onProgress)
+  return { url, publicId: crypto.randomUUID() }
 }
 
 export default function ImageUploader({ images, onChange }: ImageUploaderProps) {
@@ -51,11 +40,6 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
   const [error, setError] = useState('')
 
   const upload = async (files: FileList) => {
-    if (!CLOUD_NAME || !UPLOAD_PRESET) {
-      setError('Cloudinary not configured — add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env')
-      return
-    }
-
     setError('')
     setUploading(true)
     setProgress(0)
@@ -65,38 +49,13 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
 
     for (let i = 0; i < total; i++) {
       const file = files[i]!
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('upload_preset', UPLOAD_PRESET)
-
       try {
-        const res = await new Promise<UploadedImage>((resolve, reject) => {
-          const xhr = new XMLHttpRequest()
-          xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`)
-
-          xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) {
-              const filePct = (e.loaded / e.total) * 100
-              setProgress(Math.round(((i * 100) + filePct) / total))
-            }
-          }
-
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              const data = JSON.parse(xhr.responseText)
-              resolve({ url: data.secure_url, publicId: data.public_id })
-            } else {
-              reject(new Error('Upload failed'))
-            }
-          }
-
-          xhr.onerror = () => reject(new Error('Upload failed'))
-          xhr.send(formData)
+        const res = await uploadFile(file, (filePct) => {
+          setProgress(Math.round(((i * 100) + filePct) / total))
         })
-
         newImages.push(res)
-      } catch {
-        setError(`Failed to upload ${file.name}`)
+      } catch (err: any) {
+        setError(err?.message || `Failed to upload ${file.name}`)
       }
     }
 

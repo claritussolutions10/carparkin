@@ -80,6 +80,20 @@ export async function updateUser(req: Request, res: Response) {
   }
 }
 
+export async function updateProfile(req: Request, res: Response) {
+  const { fullName, full_name, phoneNumber, phone_number, profilePicture, profile_picture } = req.body;
+  try {
+    const profile = await adminService.updateAdminProfile(req.user!.userId, {
+      fullName: fullName ?? full_name,
+      phoneNumber: phoneNumber ?? phone_number,
+      profilePicture: profilePicture ?? profile_picture,
+    });
+    res.json({ profile });
+  } catch (err: any) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+}
+
 export async function getListings(req: Request, res: Response) {
   try {
     const page = req.query.page ? Number(req.query.page) : 1;

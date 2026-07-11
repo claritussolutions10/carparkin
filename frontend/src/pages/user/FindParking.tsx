@@ -14,6 +14,8 @@ import EmptyState from '../../components/common/EmptyState'
 import ParkingFilterPanel from '../../components/common/ParkingFilterPanel'
 import { ParkingCardSkeleton } from '../../components/common/ParkingCard'
 import NotificationBell from '../../components/common/NotificationBell'
+import FavoriteButton from '../../components/common/FavoriteButton'
+import LocationAutocomplete from '../../components/common/LocationAutocomplete'
 import { searchParkings, type Parking } from '../../api/parkings.api'
 import { AMENITY_FILTERS, SORT_OPTIONS, amenityTags } from '../../lib/parkingFilters'
 
@@ -36,12 +38,12 @@ function MapOverlayControls({ center }: { center: { lat: number; lng: number } }
     <div className="m-3 flex flex-col gap-2 items-end">
       <button
         onClick={() => { map?.panTo(center); map?.setZoom(14) }}
-        className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center text-ink/60 hover:text-green transition-colors"
+        className="w-9 h-9 rounded-full bg-surface shadow-md flex items-center justify-center text-ink/60 hover:text-green transition-colors"
         aria-label="Recenter map"
       >
         <LocateFixed size={16} />
       </button>
-      <div className="bg-white rounded-full shadow-md flex flex-col overflow-hidden">
+      <div className="bg-surface rounded-full shadow-md flex flex-col overflow-hidden">
         <button
           onClick={() => map?.setZoom((map.getZoom() ?? 14) + 1)}
           className="w-9 h-9 flex items-center justify-center text-ink/60 hover:text-green border-b border-line transition-colors"
@@ -68,7 +70,12 @@ export default function FindParking() {
   const [parkings, setParkings] = useState<Parking[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [location, setLocation] = useState(searchParams.get('city') || '')
+  const [location, setLocation] = useState(searchParams.get('location') || searchParams.get('q') || '')
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    searchParams.get('lat') && searchParams.get('lng')
+      ? { lat: Number(searchParams.get('lat')), lng: Number(searchParams.get('lng')) }
+      : null
+  )
   const [dateInput, setDateInput] = useState(searchParams.get('startDate') || '')
   const [minPrice, setMinPrice] = useState(Number(searchParams.get('minPrice')) || 800)
   const [maxPrice, setMaxPrice] = useState(Number(searchParams.get('maxPrice')) || 4500)
@@ -84,8 +91,12 @@ export default function FindParking() {
   const fetchResults = useCallback(async () => {
     setLoading(true)
     try {
+      const lat = searchParams.get('lat')
+      const lng = searchParams.get('lng')
       const result = await searchParkings({
-        city: searchParams.get('city') || undefined,
+        lat: lat ? Number(lat) : undefined,
+        lng: lng ? Number(lng) : undefined,
+        q: !lat ? searchParams.get('q') || undefined : undefined,
         minPrice: Number(searchParams.get('minPrice')) || undefined,
         maxPrice: Number(searchParams.get('maxPrice')) || undefined,
         page: 1,
@@ -103,7 +114,13 @@ export default function FindParking() {
 
   const commitSearch = () => {
     const p = new URLSearchParams()
-    if (location) p.set('city', location)
+    if (coords) {
+      p.set('lat', String(coords.lat))
+      p.set('lng', String(coords.lng))
+      p.set('location', location)
+    } else if (location) {
+      p.set('q', location)
+    }
     if (dateInput) p.set('startDate', dateInput)
     p.set('minPrice', String(minPrice))
     p.set('maxPrice', String(maxPrice))
@@ -113,6 +130,7 @@ export default function FindParking() {
 
   const resetFilters = () => {
     setLocation('')
+    setCoords(null)
     setDateInput('')
     setMinPrice(800)
     setMaxPrice(4500)
@@ -183,13 +201,14 @@ export default function FindParking() {
       {/* Inline search bar */}
       <form
         onSubmit={(e) => { e.preventDefault(); commitSearch() }}
-        className="bg-white rounded-xl border border-line shadow-sm flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-line overflow-hidden mb-5"
+        className="bg-surface rounded-xl border border-line shadow-sm flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-line overflow-hidden mb-5"
       >
         <label className="flex items-center gap-2.5 px-5 py-3.5 flex-1 min-w-0">
           <MapPin size={16} className="text-ink/40 shrink-0" />
-          <input
+          <LocationAutocomplete
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(v) => { setLocation(v); setCoords(null) }}
+            onSelect={(r) => { setLocation(r.description); setCoords({ lat: r.lat, lng: r.lng }) }}
             placeholder="Where do you want to park?"
             className="w-full min-w-0 font-body text-sm text-ink placeholder:text-ink/40 focus:outline-none"
           />
@@ -220,7 +239,7 @@ export default function FindParking() {
             key={f.key}
             onClick={() => toggleAmenity(f.key)}
             className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium shrink-0 transition-colors ${
-              amenities.has(f.key) ? 'bg-green text-white border-green' : 'bg-white text-ink/60 border-line hover:border-green/40'
+              amenities.has(f.key) ? 'bg-green text-white border-green' : 'bg-surface text-ink/60 border-line hover:border-green/40'
             }`}
           >
             <f.icon size={14} /> {f.label}
@@ -270,20 +289,25 @@ export default function FindParking() {
                     onMouseEnter={() => setHoveredId(p.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => setSelectedId(p.id)}
-                    className={`bg-white rounded-xl border overflow-hidden transition-all duration-200 cursor-pointer ${
+                    className={`bg-surface rounded-xl border overflow-hidden transition-all duration-200 cursor-pointer ${
                       isActive ? 'border-green shadow-md' : 'border-line hover:shadow-sm'
                     }`}
                   >
                     <div className="relative h-32 bg-gradient-to-br from-navy to-navy-light overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <MapPin className="text-white/25" size={28} />
-                      </div>
-                      <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-ink shadow">
+                      {p.thumbnail_url ? (
+                        <img src={p.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <MapPin className="text-white/25" size={28} />
+                        </div>
+                      )}
+                      <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-xs font-semibold text-ink shadow">
                         <Star size={11} className="text-amber fill-amber" />
                         {p.rating != null ? Number(p.rating).toFixed(1) : 'New'}
                       </span>
+                      <FavoriteButton listingId={p.id} className="absolute top-2.5 right-2.5" />
                       {isBestValue && (
-                        <span className="absolute top-2.5 right-2.5 rounded-full bg-green px-2.5 py-0.5 text-xs font-semibold text-white">
+                        <span className="absolute top-11 right-2.5 rounded-full bg-green px-2.5 py-0.5 text-xs font-semibold text-white">
                           Best Value
                         </span>
                       )}
@@ -366,7 +390,7 @@ export default function FindParking() {
 
           <button
             onClick={() => setMobileMapOpen(false)}
-            className="lg:hidden absolute top-3 left-3 inline-flex items-center gap-1.5 bg-white rounded-full px-3.5 py-2 text-sm font-medium text-ink shadow-md"
+            className="lg:hidden absolute top-3 left-3 inline-flex items-center gap-1.5 bg-surface rounded-full px-3.5 py-2 text-sm font-medium text-ink shadow-md"
           >
             <X size={14} /> Close Map
           </button>
@@ -386,7 +410,8 @@ export default function FindParking() {
       <Modal open={filtersOpen} onClose={() => setFiltersOpen(false)} title="Filters">
         <ParkingFilterPanel
           location={location}
-          onLocationChange={setLocation}
+          onLocationChange={(v) => { setLocation(v); setCoords(null) }}
+          onLocationSelect={setCoords}
           minPrice={minPrice}
           maxPrice={maxPrice}
           onPriceChange={(mn, mx) => { setMinPrice(mn); setMaxPrice(mx) }}

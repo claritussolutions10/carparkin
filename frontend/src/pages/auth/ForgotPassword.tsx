@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom'
 import { MapPin, Mail } from 'lucide-react'
 import Input from '../../components/common/Input'
 import Button from '../../components/common/Button'
-import BarrierGate from '../../components/common/BarrierGate'
-import CitySkyline from '../../components/common/CitySkyline'
+import authImage from '../../assets/auth-illustration.png'
 import { forgotPassword } from '../../api/auth.api'
 
 export default function ForgotPassword() {
@@ -29,15 +28,15 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-concrete flex flex-col">
-      <header className="bg-white border-b border-line">
+      <header className="bg-surface border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <MapPin className="text-green" size={24} fill="currentColor" strokeWidth={1.5} />
-            <span className="font-display text-lg font-semibold text-navy">Carparkin.in</span>
+            <span className="font-display text-lg font-semibold text-ink">Carparkin.in</span>
           </Link>
           <Link
             to="/login"
-            className="rounded-full bg-green-100 text-ink text-sm font-medium px-4 py-2 hover:bg-green-200 transition-colors"
+            className="rounded-full bg-green-100 text-green-700 text-sm font-medium px-4 py-2 hover:bg-green-200 transition-colors"
           >
             Back to Login
           </Link>
@@ -45,7 +44,7 @@ export default function ForgotPassword() {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-10 md:py-16">
-        <div className="w-full max-w-[1200px] bg-white rounded-xl shadow-lg border border-line overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        <div className="w-full max-w-[1200px] bg-surface rounded-xl shadow-lg border border-line overflow-hidden grid grid-cols-1 md:grid-cols-2">
           {/* Left: form */}
           <div className="p-8 md:p-12 flex flex-col justify-center">
             {sent ? (
@@ -93,15 +92,10 @@ export default function ForgotPassword() {
 
           {/* Right: image + barrier */}
           <div className="hidden md:flex relative bg-navy">
-            <div className="absolute inset-0 bg-gradient-to-br from-navy to-navy-light" />
-            <CitySkyline className="absolute bottom-0 left-0 w-full h-1/2 text-black/25" />
+            <img src={authImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-            <div className="relative flex-1 flex flex-col justify-between p-8">
-              <div className="flex justify-center pt-4">
-                <BarrierGate open={sent} />
-              </div>
-
+            <div className="relative flex-1 flex flex-col justify-end p-8">
               <div>
                 <div className="w-10 h-10 rounded-lg bg-green flex items-center justify-center">
                   <span className="font-display font-bold text-white">P</span>

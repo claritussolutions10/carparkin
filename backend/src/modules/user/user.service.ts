@@ -1,7 +1,9 @@
 import pool from "../../config/database";
 import { generateVehicleId, generateReviewId } from "../../utils/ulid";
 import { VehicleRow } from "../../types";
-import { notifyAdmins } from "../notifications/notifications.service";
+import { notifyAdmins, createNotification } from "../notifications/notifications.service";
+import razorpay from "../../config/razorpay";
+import { normalizeRazorpayError } from "../../lib/razorpayError";
 
 export async function getUserBookings(
   userId: string,
@@ -197,7 +199,11 @@ export async function getBookingById(bookingId: string, userId: string) {
 
 export async function cancelBooking(bookingId: string, userId: string) {
   const check = await pool.query(
-    "SELECT user_id, status, booking_start_date FROM bookings WHERE id = $1",
+    `SELECT b.user_id, b.status, b.booking_start_date, b.total_price, b.razorpay_payment_id,
+            pl.owner_id, pl.title AS listing_title
+     FROM bookings b
+     JOIN parking_listings pl ON pl.id = b.parking_listing_id
+     WHERE b.id = $1`,
     [bookingId]
   );
   if (!check.rows[0]) {
@@ -206,18 +212,49 @@ export async function cancelBooking(bookingId: string, userId: string) {
   if (check.rows[0].user_id !== userId) {
     throw Object.assign(new Error("Not authorized"), { status: 403 });
   }
-  const { status, booking_start_date } = check.rows[0];
+  const { status, booking_start_date, total_price, razorpay_payment_id, owner_id, listing_title } = check.rows[0];
   if (status !== "pending" && status !== "confirmed") {
     throw Object.assign(new Error("Only pending or confirmed bookings can be cancelled"), { status: 400 });
   }
+  // Cutoff is the booking's own start time, not an arbitrary buffer - once
+  // that's passed the driver is presumed to already be parked there.
   const hoursUntilStart = (new Date(booking_start_date).getTime() - Date.now()) / 3600000;
-  if (hoursUntilStart < 24) {
-    throw Object.assign(new Error("Cannot cancel within 24 hours of start"), { status: 400 });
+  if (hoursUntilStart < 0) {
+    throw Object.assign(new Error("This booking has already started and can no longer be cancelled"), { status: 400 });
   }
+
+  let refundId: string | null = null;
+  let refundStatus: string | null = null;
+  if (status === "confirmed" && razorpay_payment_id) {
+    const refund = await razorpay.payments.refund(razorpay_payment_id, {
+      amount: Math.round(Number(total_price) * 100),
+    }).catch((err) => { throw normalizeRazorpayError(err); });
+    refundId = refund.id;
+    refundStatus = refund.status;
+  }
+
   const result = await pool.query(
-    "UPDATE bookings SET status = 'cancelled', updated_at = NOW() WHERE id = $1 RETURNING *",
+    `UPDATE bookings
+     SET status = 'cancelled', updated_at = NOW(),
+         payment_status = CASE WHEN $2::text IS NOT NULL THEN 'refunded' ELSE payment_status END,
+         refund_id = $2, refund_status = $3
+     WHERE id = $1
+     RETURNING *`,
+    [bookingId, refundId, refundStatus]
+  );
+
+  // Voided, not deleted, so the owner's earnings history still shows what happened.
+  await pool.query(
+    "UPDATE owner_earnings SET status = 'cancelled', updated_at = NOW() WHERE booking_id = $1 AND status = 'pending'",
     [bookingId]
   );
+
+  await createNotification(
+    owner_id, "booking_cancelled", "Booking cancelled",
+    `A booking for "${listing_title}" was cancelled by the driver.${refundId ? " A refund has been issued." : ""}`,
+    "/owner/bookings"
+  );
+
   return result.rows[0];
 }
 
@@ -339,15 +376,16 @@ export async function writeReview(
   return result.rows[0];
 }
 
-export async function updateProfile(userId: string, data: { fullName?: string; phoneNumber?: string }) {
+export async function updateProfile(userId: string, data: { fullName?: string; phoneNumber?: string; profilePicture?: string }) {
   const result = await pool.query(
     `UPDATE users
      SET full_name = COALESCE($1, full_name),
          phone_number = COALESCE($2, phone_number),
+         profile_picture = COALESCE($3, profile_picture),
          updated_at = NOW()
-     WHERE id = $3
+     WHERE id = $4
      RETURNING id, email, full_name, phone_number, profile_picture, role, is_email_verified, updated_at`,
-    [data.fullName ?? null, data.phoneNumber ?? null, userId]
+    [data.fullName ?? null, data.phoneNumber ?? null, data.profilePicture ?? null, userId]
   );
   if (!result.rows[0]) throw Object.assign(new Error("User not found"), { status: 404 });
   return result.rows[0];
